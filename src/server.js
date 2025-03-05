@@ -58,27 +58,22 @@ async function sendEmail(to, subject, reportHtml, attachments, attachments2) {
     to: to,               // Destinatario que viene del body
     subject: subject,     // Asunto que viene del body
     html: reportHtml,
-    attachments: [attachments2],
+    attachments: [],
     // HTML generado
   };
 
-  if (!attachments) {
-
-    if (!attachments2) {
-      mailOptions.attachments = [];
-    }
+  if (!attachments && !attachments2) {
+    mailOptions.attachments = [];
+  } else if (!attachments) {
     mailOptions.attachments = [attachments2];
-
-
+  } else if (!attachments2) {
+    mailOptions.attachments = [attachments];
+  } else {
+    mailOptions.attachments = [attachments, attachments2];
   }
 
-  if (!attachments2) {
-    if (!attachments) {
-      mailOptions.attachments = [];
 
-    }
-    mailOptions.attachments = [attachments]
-  }
+
 
 
 
