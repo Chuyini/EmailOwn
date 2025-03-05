@@ -33,7 +33,7 @@ app.post('/send-email', async (req, res) => {
 
     console.log(process.env.GMAIL)
     // Llamamos a la función que envía el correo
-    await sendEmail(to[0], subject, reportHtml, attachments[0], attachments[1]);
+    await sendEmail(to, subject, reportHtml, attachments[0], attachments[1]);
 
     // Si todo sale bien, respondemos con éxito
     return res.status(200).json({ message: 'Correo enviado con éxito' });
