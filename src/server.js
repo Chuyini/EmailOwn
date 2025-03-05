@@ -45,6 +45,7 @@ app.post('/send-email', async (req, res) => {
 
 // Función para enviar el correo electrónico
 async function sendEmail(to, subject, reportHtml, attachments, attachments2) {
+
   let transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -52,49 +53,31 @@ async function sendEmail(to, subject, reportHtml, attachments, attachments2) {
       pass: process.env.PASSWORD_GMAIL
     }
   });
+  let mailOptions = {
+    from: process.env.GMAIL,
+    to: to,               // Destinatario que viene del body
+    subject: subject,     // Asunto que viene del body
+    html: reportHtml,
+    attachments: [attachments2],
+    // HTML generado
+  };
 
   if (!attachments) {
 
     if (!attachments2) {
-      let mailOptions = {
-        from: process.env.GMAIL,
-        to: to,               // Destinatario que viene del body
-        subject: subject,     // Asunto que viene del body
-        html: reportHtml,
-
-        // HTML generado
-      };
+      mailOptions.attachments = [];
     }
-    let mailOptions = {
-      from: process.env.GMAIL,
-      to: to,               // Destinatario que viene del body
-      subject: subject,     // Asunto que viene del body
-      html: reportHtml,
-      attachments: [attachments2],
-      // HTML generado
-    };
+    mailOptions.attachments = [attachments2];
+
 
   }
-   
+
   if (!attachments2) {
     if (!attachments) {
-      let mailOptions = {
-        from: process.env.GMAIL,
-        to: to,               // Destinatario que viene del body
-        subject: subject,     // Asunto que viene del body
-        html: reportHtml,
-        // HTML generado
-      };
+      mailOptions.attachments = [];
 
     }
-    let mailOptions = {
-      from: process.env.GMAIL,
-      to: to,               // Destinatario que viene del body
-      subject: subject,     // Asunto que viene del body
-      html: reportHtml,
-      attachments: [attachments],
-      // HTML generado
-    };
+    mailOptions.attachments = [attachments]
   }
 
 
