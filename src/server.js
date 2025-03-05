@@ -62,15 +62,16 @@ async function sendEmail(to, subject, reportHtml, attachments, attachments2) {
     // HTML generado
   };
 
-  if (!attachments && !attachments2) {
-    mailOptions.attachments = [];
-  } else if (!attachments) {
-    mailOptions.attachments = [attachments2];
-  } else if (!attachments2) {
-    mailOptions.attachments = [attachments];
-  } else {
-    mailOptions.attachments = [attachments, attachments2];
+
+
+  if (attachments) {
+    mailOptions.attachments.push(attachments)
   }
+  if (attachments) {
+    mailOptions.attachments.push(attachments2);
+  }
+
+
 
 
 
