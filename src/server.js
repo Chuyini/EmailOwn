@@ -112,7 +112,7 @@ function createHTMLReport(variables) {
   const sitio = data.contacto_sitio;
   const vend = data.datos_vendedor;
 
-  // Construimos un HTML con estilo más formal
+  // Construimos un HTML con estilo más "formal y llamativo"
   const htmlReport = `
 <!DOCTYPE html>
 <html lang="es">
@@ -121,19 +121,20 @@ function createHTMLReport(variables) {
   <title>Reporte de Alta de Cliente</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: "Segoe UI", Arial, sans-serif;
       margin: 0; 
       padding: 0; 
-      background-color: #f4f4f4;
+      background-color: #fafafa;
       color: #333;
+      line-height: 1.5;
     }
     .container {
-      width: 60%;
+      width: 65%;
       margin: 40px auto;
       background: #fff;
-      padding: 25px;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
     h1 {
       text-align: center;
@@ -141,23 +142,26 @@ function createHTMLReport(variables) {
       color: #444;
       font-size: 28px;
       text-transform: uppercase;
+      letter-spacing: 1px;
     }
     h2 {
       color: #007bff;
       border-bottom: 2px solid #007bff;
-      padding-bottom: 5px;
+      padding-bottom: 8px;
       margin-top: 40px;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
       text-align: center;
       text-transform: uppercase;
+      font-size: 22px;
+      letter-spacing: 0.5px;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
     }
     .section-table td {
-      padding: 8px 4px;
+      padding: 10px 6px;
       vertical-align: top;
     }
     .label {
@@ -165,11 +169,17 @@ function createHTMLReport(variables) {
       width: 30%;
       text-align: right;
       color: #555;
+      font-size: 16px;
     }
     .value {
       width: 70%;
       text-align: left;
       color: #333;
+      font-size: 16px;
+    }
+    /* Opcional: líneas sutiles en la tabla */
+    .section-table td {
+      border-bottom: 1px solid #eee;
     }
   </style>
 </head>
@@ -267,7 +277,6 @@ function createHTMLReport(variables) {
       <tr><td class="label">Correos:</td><td class="value">${vend.correos}</td></tr>
       <tr><td class="label">Celular Vendedor:</td><td class="value">${vend.celular_vendedor}</td></tr>
     </table>
-
   </div>
 </body>
 </html>
