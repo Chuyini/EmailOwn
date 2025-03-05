@@ -24,7 +24,7 @@ app.post('/send-email', async (req, res) => {
     // Podrías generar un HTML más elaborado; aquí lo mantenemos sencillo
     const reportHtml = createHTMLReport(variables);
 
-    console.log(`To: ${to}`);
+    console.log(`To: ${to[0]}`);
     console.log(`Subject: ${subject}`);
     console.log(`Text: ${text}`);
 
