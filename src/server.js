@@ -67,7 +67,7 @@ async function sendEmail(to, subject, reportHtml, attachments, attachments2) {
   if (attachments) {
     mailOptions.attachments.push(attachments)
   }
-  if (attachments) {
+  if (attachments2) {
     mailOptions.attachments.push(attachments2);
   }
 
