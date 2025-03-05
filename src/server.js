@@ -146,7 +146,7 @@ function createHTMLReport(variables) {
     <!-- DATOS FISCALES -->
     <h2>Datos Fiscales</h2>
     <p><span class="bold">Razón Social / Nombre:</span> ${df.razon_social}</p>
-    <p><span class="bold">Régimen Fiscal (ID):</span> ${df.regimen_fiscal.id}</p>
+    <p><span class="bold">Régimen Fiscal (nombre):</span> ${df.regimen_fiscal.nombre}</p>
     <p><span class="bold">RFC:</span> ${df.rfc}</p>
     <p><span class="bold">Calle:</span> ${df.calle}</p>
     <p><span class="bold">N° Int:</span> ${df.numero_interior}</p>
