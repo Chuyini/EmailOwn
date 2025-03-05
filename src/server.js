@@ -13,7 +13,7 @@ app.use(express.json({ limit: '10mb' })); // Aumenta el límite de tamaño del c
 app.post('/send-email', async (req, res) => {
   // Extraer los datos que envía el frontend
   const { to, subject, text, attachments, variables } = req.body;
-  console.log("Desde el servidor se recibio el body: ",req.body);
+  console.log("Desde el servidor se recibio el body: ", req.body);
   try {
 
     if (attachments && attachments.length > 0) {
@@ -53,14 +53,51 @@ async function sendEmail(to, subject, reportHtml, attachments, attachments2) {
     }
   });
 
-  let mailOptions = {
-    from: process.env.GMAIL,
-    to: to,               // Destinatario que viene del body
-    subject: subject,     // Asunto que viene del body
-    html: reportHtml,
-    attachments: [attachments, attachments2],
-    // HTML generado
-  };
+  if (!attachments) {
+
+    if (!attachments2) {
+      let mailOptions = {
+        from: process.env.GMAIL,
+        to: to,               // Destinatario que viene del body
+        subject: subject,     // Asunto que viene del body
+        html: reportHtml,
+
+        // HTML generado
+      };
+    }
+    let mailOptions = {
+      from: process.env.GMAIL,
+      to: to,               // Destinatario que viene del body
+      subject: subject,     // Asunto que viene del body
+      html: reportHtml,
+      attachments: [attachments2],
+      // HTML generado
+    };
+
+  }
+   
+  if (!attachments2) {
+    if (!attachments) {
+      let mailOptions = {
+        from: process.env.GMAIL,
+        to: to,               // Destinatario que viene del body
+        subject: subject,     // Asunto que viene del body
+        html: reportHtml,
+        // HTML generado
+      };
+
+    }
+    let mailOptions = {
+      from: process.env.GMAIL,
+      to: to,               // Destinatario que viene del body
+      subject: subject,     // Asunto que viene del body
+      html: reportHtml,
+      attachments: [attachments],
+      // HTML generado
+    };
+  }
+
+
 
   // Nota: sendMail es asíncrono, pero podemos usar callbacks o await
   return new Promise((resolve, reject) => {
