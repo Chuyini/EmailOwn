@@ -13,6 +13,7 @@ app.use(express.json({ limit: '10mb' })); // Aumenta el límite de tamaño del c
 app.post('/send-email', async (req, res) => {
   // Extraer los datos que envía el frontend
   const { to, subject, text, attachments, variables } = req.body;
+  console.log("Desde el servidor se recibio el body: ",req.body);
   try {
 
     if (attachments && attachments.length > 0) {
@@ -24,7 +25,7 @@ app.post('/send-email', async (req, res) => {
     // Podrías generar un HTML más elaborado; aquí lo mantenemos sencillo
     const reportHtml = createHTMLReport(variables);
 
-    console.log(`To: ${to[0]}`);
+    console.log(`To: ${to}`);
     console.log(`Subject: ${subject}`);
     console.log(`Text: ${text}`);
 
