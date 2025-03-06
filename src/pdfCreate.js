@@ -1,4 +1,7 @@
 const PDFDocument = require('pdfkit');
+const axios = require('axios');
+const fs = require('fs');
+
 
 /**
  * Genera un PDF con los datos en 'variables' y retorna un Buffer
@@ -7,7 +10,13 @@ const PDFDocument = require('pdfkit');
  * @param {Array} variables - Array con la info de tu reporte (variables[0] es el objeto principal)
  * @returns {Promise<Buffer>} - Devuelve un Buffer con el PDF
  */
-function generatePdfReport(variables) {
+async function generatePdfReport(variables) {
+
+      // 1. Descargamos la imagen de la nube (Google Drive, etc.)
+  const response = await axios.get('https://drive.google.com/uc?export=view&id=1v6uI_38OqosSeTBOWJW2M09ZD9JolvYn', { responseType: 'arraybuffer' });
+  // Convertimos el 'arraybuffer' a Buffer
+  const imageBuffer = Buffer.from(response.data, 'binary');
+
     return new Promise((resolve, reject) => {
         // Suponiendo que 'variables' es un array con un único objeto
         const data = variables[0];
@@ -42,7 +51,7 @@ function generatePdfReport(variables) {
 
         // Título principal
         // Insertar logo en la esquina superior izquierda
-        doc.image('LogoPdNet.jpg', 50, 50, { width: 100 })
+        doc.image(imageBuffer, 50, 50, { width: 100 })
             .moveDown(2); // baja un poco el cursor
 
         doc
