@@ -43,7 +43,7 @@ app.post('/send-email', async (req, res) => {
     });
     console.log(process.env.GMAIL)
     // Llamamos a la función que envía el correo
-    await sendEmail(to, subject, reportHtml, attachments[0], attachments[1],attachments[2]);
+    await sendEmail(to, subject, reportHtml, attachments[0], attachments[1], attachments[2]);
 
     // Si todo sale bien, respondemos con éxito
     return res.status(200).json({ message: 'Correo enviado con éxito' });
@@ -71,7 +71,7 @@ async function sendEmail(to, subject, reportHtml, attachments, attachments2, att
     to: to,               // Destinatario que viene del body
     subject: subject,     // Asunto que viene del body
     html: reportHtml,
-    attachments: [attachments3],
+    attachments: [],
     // HTML generado
   };
 
@@ -84,7 +84,9 @@ async function sendEmail(to, subject, reportHtml, attachments, attachments2, att
     mailOptions.attachments.push(attachments2);
   }
 
-
+  if (attachments3) {
+    mailOptions.attachments.push(attachments3);
+  }
 
 
 
