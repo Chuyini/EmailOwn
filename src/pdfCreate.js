@@ -43,7 +43,7 @@ function generatePdfReport(variables) {
     // Título principal
     doc
       .fontSize(18)
-      .text('Reporte de Alta de Cliente', { align: 'center' })
+      .text('DOCUMENTO DE ALTA DE CLIENTE', { align: 'center' })
       .moveDown(2);
 
     // ---- DATOS FISCALES ----

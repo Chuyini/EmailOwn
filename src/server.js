@@ -34,7 +34,7 @@ app.post('/send-email', async (req, res) => {
     const pdfBuffer = await generatePdfReport(variables);
     attachments.push({
 
-      filename: 'reporte.pdf',
+      filename: 'Documento ALTA DE CLIENTE.pdf',
       content: pdfBuffer
       // Si quieres base64:
       // content: pdfBuffer.toString('base64'),
