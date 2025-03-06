@@ -2,6 +2,7 @@ require('dotenv').config(); // Carga las variables de entorno de .env
 const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
+const { generatePdfReport } = require('./pdfCreate');
 
 
 
@@ -30,10 +31,19 @@ app.post('/send-email', async (req, res) => {
     console.log(`Text: ${text}`);
 
 
+    const pdfBuffer = await generatePdfReport(variables);
+    attachments.push({
 
+      filename: 'reporte.pdf',
+      content: pdfBuffer
+      // Si quieres base64:
+      // content: pdfBuffer.toString('base64'),
+      // encoding: 'base64'
+
+    });
     console.log(process.env.GMAIL)
     // Llamamos a la función que envía el correo
-    await sendEmail(to, subject, reportHtml, attachments[0], attachments[1]);
+    await sendEmail(to, subject, reportHtml, attachments[0], attachments[1],attachments[2]);
 
     // Si todo sale bien, respondemos con éxito
     return res.status(200).json({ message: 'Correo enviado con éxito' });
@@ -44,7 +54,7 @@ app.post('/send-email', async (req, res) => {
 });
 
 // Función para enviar el correo electrónico
-async function sendEmail(to, subject, reportHtml, attachments, attachments2) {
+async function sendEmail(to, subject, reportHtml, attachments, attachments2, attachments3) {
 
   let transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -53,12 +63,15 @@ async function sendEmail(to, subject, reportHtml, attachments, attachments2) {
       pass: process.env.PASSWORD_GMAIL
     }
   });
+
+
+
   let mailOptions = {
     from: process.env.GMAIL,
     to: to,               // Destinatario que viene del body
     subject: subject,     // Asunto que viene del body
     html: reportHtml,
-    attachments: [],
+    attachments: [attachments3],
     // HTML generado
   };
 
