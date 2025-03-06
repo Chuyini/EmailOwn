@@ -42,7 +42,7 @@ function generatePdfReport(variables) {
 
         // Título principal
         // Insertar logo en la esquina superior izquierda
-        doc.image('./LogoPdNet.jpg', 50, 50, { width: 100 })
+        doc.image('LogoPdNet.jpg', 50, 50, { width: 100 })
             .moveDown(2); // baja un poco el cursor
 
         doc
