@@ -8,7 +8,11 @@ const { generatePdfReport } = require('./pdfCreate');
 
 
 const app = express();
-app.use(cors({ origin: '*' }));
+app.use(cors({
+  origin: 'https://formulario-pd-net.vercel.app', // Dominio de tu frontend
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'Authorization'], // Asegúrate de incluir los encabezados necesarios
+}));
 app.use(express.json({ limit: '70mb' })); // Aumenta el límite de tamaño del cuerpo para manejar archivos grandes
 // Endpoint para enviar correos
 app.post('/send-email', async (req, res) => {
