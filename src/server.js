@@ -16,7 +16,9 @@ app.use(cors({
 // Manejar preflight (OPTIONS)
 app.options('/send-email', cors());
 
-app.use(express.json({ limit: '70mb' }));
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
+
 // Endpoint para enviar correos
 app.post('/send-email', async (req, res) => {
   // No necesitas el uso de `res.header` aquí, ya que CORS lo maneja automáticamente con el middleware
