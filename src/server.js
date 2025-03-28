@@ -4,30 +4,30 @@ const nodemailer = require('nodemailer');
 const cors = require('cors');
 const { generatePdfReport } = require('./pdfCreate');
 
-
-
-
 const app = express();
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://formulario-pd-net.vercel.app'); // Especifica tu dominio frontend
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  next();
-});
+
+// Middleware para CORS
+app.use(cors({
+  origin: 'https://formulario-pd-net.vercel.app', // Dominio de tu frontend
+  methods: ['GET', 'POST'],
+}));
+
+// Middleware para JSON
 app.use(express.json({ limit: '70mb' })); // Aumenta el límite de tamaño del cuerpo para manejar archivos grandes
+
 // Endpoint para enviar correos
 app.post('/send-email', async (req, res) => {
+  // No necesitas el uso de `res.header` aquí, ya que CORS lo maneja automáticamente con el middleware
   // Extraer los datos que envía el frontend
   const { to, subject, text, attachments, variables } = req.body;
   console.log("Desde el servidor se recibio el body: ", req.body);
-  try {
 
+  try {
     if (attachments && attachments.length > 0) {
       const { filename, content, encoding } = attachments[0];
-      //console.log(`Filename: ${filename}`);
-      //console.log(`Content (base64): ${content}`);
-      //console.log(`Encoding: ${encoding}`);
+      // Puedes usar estos datos si lo necesitas
     }
+
     // Podrías generar un HTML más elaborado; aquí lo mantenemos sencillo
     const reportHtml = createHTMLReport(variables);
 
@@ -35,18 +35,14 @@ app.post('/send-email', async (req, res) => {
     console.log(`Subject: ${subject}`);
     console.log(`Text: ${text}`);
 
-
     const pdfBuffer = await generatePdfReport(variables);
     attachments.push({
-
       filename: 'Documento ALTA DE CLIENTE.pdf',
-      content: pdfBuffer
-      // Si quieres base64:
-      // content: pdfBuffer.toString('base64'),
-      // encoding: 'base64'
-
+      content: pdfBuffer,
     });
-    console.log(process.env.GMAIL)
+
+    console.log(process.env.GMAIL);
+
     // Llamamos a la función que envía el correo
     await sendEmail(to, subject, reportHtml, attachments[0], attachments[1], attachments[2]);
 
@@ -57,7 +53,6 @@ app.post('/send-email', async (req, res) => {
     return res.status(500).json({ message: 'Error al enviar correo', error });
   }
 });
-
 // Función para enviar el correo electrónico
 async function sendEmail(to, subject, reportHtml, attachments, attachments2, attachments3) {
 

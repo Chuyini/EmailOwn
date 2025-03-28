@@ -11,6 +11,17 @@
         "src": "/(.*)",
         "dest": "src/server.js"
       }
-    ]
-  }
+    ],
+    "headers": [
+    {
+      "source": "/send-email",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "https://formulario-pd-net.vercel.app" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
+      ]
+    }
+  ]
+
+}
   
