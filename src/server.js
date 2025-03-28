@@ -1,4 +1,4 @@
-require('dotenv').config(); // Carga las variables de entorno de .env
+require('dotenv').config();
 const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
@@ -16,50 +16,45 @@ app.use(cors({
 // Manejar preflight (OPTIONS)
 app.options('/send-email', cors());
 
+// Aumentar el límite del payload
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 // Endpoint para enviar correos
 app.post('/send-email', async (req, res) => {
-  // No necesitas el uso de `res.header` aquí, ya que CORS lo maneja automáticamente con el middleware
-  // Extraer los datos que envía el frontend
   const { to, subject, text, attachments, variables } = req.body;
-  console.log("Desde el servidor se recibio el body: ", req.body);
+  console.log("Desde el servidor se recibió el body:", req.body);
 
   try {
-    if (attachments && attachments.length > 0) {
-      const { filename, content, encoding } = attachments[0];
-      // Puedes usar estos datos si lo necesitas
+    // Validación de adjuntos
+    if (attachments?.length > 0) {
+      console.log("Adjunto recibido:", attachments);
     }
 
-    // Podrías generar un HTML más elaborado; aquí lo mantenemos sencillo
     const reportHtml = createHTMLReport(variables);
-
     console.log(`To: ${to}`);
     console.log(`Subject: ${subject}`);
     console.log(`Text: ${text}`);
 
+    // Genera el PDF y lo agrega a los adjuntos
     const pdfBuffer = await generatePdfReport(variables);
     attachments.push({
       filename: 'Documento ALTA DE CLIENTE.pdf',
       content: pdfBuffer,
     });
 
-    console.log(process.env.GMAIL);
-
-    // Llamamos a la función que envía el correo
+    // Enviar el correo
     await sendEmail(to, subject, reportHtml, attachments[0], attachments[1], attachments[2]);
-
-    // Si todo sale bien, respondemos con éxito
     return res.status(200).json({ message: 'Correo enviado con éxito' });
+
   } catch (error) {
     console.error('Error al enviar correo:', error);
     return res.status(500).json({ message: 'Error al enviar correo', error });
   }
 });
-// Función para enviar el correo electrónico
-async function sendEmail(to, subject, reportHtml, attachments, attachments2, attachments3) {
 
+// Función para enviar correos con Nodemailer
+async function sendEmail(to, subject, reportHtml, ...attachments) {
   let transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -68,36 +63,14 @@ async function sendEmail(to, subject, reportHtml, attachments, attachments2, att
     }
   });
 
-
-
   let mailOptions = {
     from: process.env.GMAIL,
-    to: to,               // Destinatario que viene del body
-    subject: subject,     // Asunto que viene del body
+    to,
+    subject,
     html: reportHtml,
-    attachments: [],
-    // HTML generado
+    attachments: attachments.filter(a => a) // Filtra adjuntos nulos o undefined
   };
 
-
-
-  if (attachments) {
-    mailOptions.attachments.push(attachments)
-  }
-  if (attachments2) {
-    mailOptions.attachments.push(attachments2);
-  }
-
-  if (attachments3) {
-    mailOptions.attachments.push(attachments3);
-  }
-
-
-
-
-
-
-  // Nota: sendMail es asíncrono, pero podemos usar callbacks o await
   return new Promise((resolve, reject) => {
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
@@ -114,9 +87,8 @@ async function sendEmail(to, subject, reportHtml, attachments, attachments2, att
 // Iniciar el servidor
 const PORT = 3000;
 app.listen(PORT, () => {
-  console.log(`Servidor de correos en http://localhost:${PORT} correo ${process.env.GMAIL}`);
+  console.log(`Servidor de correos en http://localhost:${PORT}`);
 });
-
 
 function createHTMLReport(variables) {
   // Suponiendo que 'variables' es un array con un único objeto
