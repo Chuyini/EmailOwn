@@ -8,11 +8,10 @@ const app = express();
 
 // Configurar CORS
 app.use(cors({
-  origin: 'https://formulario-pd-net.vercel.app',
+  origin: ['https://formulario-pd-net.vercel.app', 'http://localhost:4200'], // Array de orígenes permitidos
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-
 // Manejar preflight (OPTIONS)
 app.options('/send-email', cors());
 
