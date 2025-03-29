@@ -214,7 +214,7 @@ function createHTMLReport(variables) {
       <tr><td class="label">Zona:</td><td class="value">${di.zona}</td></tr>
       <tr><td class="label">Teléfono:</td><td class="value">${di.telefono}</td></tr>
     </table>
-
+ 
     <!-- INFORMACIÓN PARA FACTURACIÓN -->
     <h2>Información para Facturación</h2>
     <table class="section-table">
