@@ -8,9 +8,12 @@ const app = express();
 
 // Configurar CORS
 app.use(cors({
-  origin: ['https://formulario-pd-net.vercel.app','https://formulario-pd-net.vercel.app/send', 'http://localhost:4200','https://emailown-production.up.railway.app/send-email','https://emailown-production.up.railway.app'], // Array de orígenes permitidos
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  origin: [
+    'https://formulario-pd-net.vercel.app', // Tu frontend en producción
+    'http://localhost:4200' // Para pruebas locales
+  ], // Lista de orígenes permitidos
+  methods: ['GET', 'POST', 'OPTIONS'], // Métodos permitidos
+  allowedHeaders: ['Content-Type', 'Authorization'], // Headers permitidos
 }));
 // Manejar preflight (OPTIONS)
 app.options('/send-email', cors());
