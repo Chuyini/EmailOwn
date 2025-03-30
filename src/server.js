@@ -30,7 +30,7 @@ app.post('/send-email', async (req, res) => {
   try {
     // Validación de adjuntos
     if (attachments?.length > 0) {
-      console.log("Adjunto recibido:", attachments);
+      console.log("Adjunto recibido:", attachments[0]);
     }
 
     const reportHtml = createHTMLReport(variables);
