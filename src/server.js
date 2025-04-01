@@ -3,17 +3,16 @@ const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
 const { generatePdfReport } = require('./pdfCreate');
+import fs from 'fs';
+import { google } from 'googleapis'; 
 
 const app = express();
 
 // Configurar CORS
 app.use(cors({
-  origin: [
-    'https://formulario-pd-net.vercel.app', // Tu frontend en producción
-    'http://localhost:4200' // Para pruebas locales
-  ], // Lista de orígenes permitidos
-  methods: ['GET', 'POST', 'OPTIONS'], // Métodos permitidos
-  allowedHeaders: ['Content-Type', 'Authorization'], // Headers permitidos
+  origin: ['https://formulario-pd-net.vercel.app', 'http://localhost:4200','https://emailown-production.up.railway.app'], // Array de orígenes permitidos
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 // Manejar preflight (OPTIONS)
 app.options('/send-email', cors());
@@ -22,40 +21,61 @@ app.options('/send-email', cors());
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
-// Endpoint para enviar correos
+// 📌 Función para subir a Google Drive
+async function uploadToDrive(buffer, fileName, mimeType) {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      keyFile: 'client.json',
+      scopes: ['https://www.googleapis.com/auth/drive.file'],
+    });
+
+    const drive = google.drive({ version: 'v3', auth });
+
+    // Guardar temporalmente el archivo
+    const tempPath = `./temp/${fileName}`;
+    fs.writeFileSync(tempPath, buffer);
+
+    const response = await drive.files.create({
+      requestBody: { name: fileName, mimeType: mimeType },
+      media: { mimeType: mimeType, body: fs.createReadStream(tempPath) },
+    });
+
+    // Eliminar archivo temporal
+    fs.unlinkSync(tempPath);
+
+    console.log('Archivo subido con éxito:', response.data);
+    return `https://drive.google.com/file/d/${response.data.id}/view?usp=sharing`;
+  } catch (error) {
+    console.error('Error al subir archivo a Google Drive:', error);
+  }
+}
+
+// 📩 Endpoint para enviar correo
 app.post('/send-email', async (req, res) => {
   const { to, subject, text, attachments, variables } = req.body;
   console.log("Desde el servidor se recibió el body:", req.body);
 
   try {
-    // Validación de adjuntos
-    if (attachments?.length > 0) {
-      console.log("Adjunto recibido:", attachments[0]);
-    }
-
     const reportHtml = createHTMLReport(variables);
-    console.log(`To: ${to}`);
-    console.log(`Subject: ${subject}`);
-    console.log(`Text: ${text}`);
-
-    // Genera el PDF y lo agrega a los adjuntos
     const pdfBuffer = await generatePdfReport(variables);
-    attachments.push({
-      filename: 'Documento ALTA DE CLIENTE.pdf',
-      content: pdfBuffer,
-    });
+    attachments.push({ filename: 'Documento ALTA DE CLIENTE.pdf', content: pdfBuffer });
 
-    // Enviar el correo
-    await sendEmail(to, subject, reportHtml, attachments[0], attachments[1], attachments[2]);
-    return res.status(200).json({ message: 'Correo enviado con éxito' });
+    // 🔼 Subir ZIP a Drive y obtener enlace
+    const driveLink = await uploadToDrive(attachments[1].content, 'Documentos.zip', 'application/zip');
 
+    // Enviar el correo con el enlace
+    const emailBody = `${text} <br><br> <strong>Descarga tu archivo aquí:</strong> <a href="${driveLink}">${driveLink}</a>`;
+    await sendEmail(to, subject, emailBody, attachments[0], attachments[2]);
+
+    return res.status(200).json({ message: 'Correo enviado con éxito', driveLink });
   } catch (error) {
     console.error('Error al enviar correo:', error);
     return res.status(500).json({ message: 'Error al enviar correo', error });
   }
 });
 
-// Función para enviar correos con Nodemailer
+
+// 📧 Función para enviar correos
 async function sendEmail(to, subject, reportHtml, ...attachments) {
   let transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -70,7 +90,7 @@ async function sendEmail(to, subject, reportHtml, ...attachments) {
     to,
     subject,
     html: reportHtml,
-    attachments: attachments.filter(a => a) // Filtra adjuntos nulos o undefined
+    attachments: attachments.filter(a => a)
   };
 
   return new Promise((resolve, reject) => {
@@ -85,6 +105,7 @@ async function sendEmail(to, subject, reportHtml, ...attachments) {
     });
   });
 }
+
 
 // Iniciar el servidor
 const PORT = 3000;
@@ -276,4 +297,9 @@ function createHTMLReport(variables) {
 `;
   return htmlReport;
 }
+
+
+
+
+
 

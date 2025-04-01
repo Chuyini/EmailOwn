@@ -85,7 +85,6 @@ async function generatePdfReport(variables) {
             .text(`Correo Electrónico: ${df.correo_electronico}`)
             .text(`Página Web: ${df.pagina_web}`)
             .moveDown(1);
-
         // ---- DOMICILIO DE INSTALACION ----
         doc
             .fontSize(14)
@@ -93,7 +92,6 @@ async function generatePdfReport(variables) {
             .text('Domicilio de Instalación', { underline: true })
             .fillColor('black')
             .moveDown(0.5);
-
         doc.fontSize(11)
             .text(`Calle: ${di.calle}`)
             .text(`N° Ext: ${di.numero_exterior}`)
@@ -107,7 +105,6 @@ async function generatePdfReport(variables) {
             .text(`Zona: ${di.zona}`)
             .text(`Teléfono: ${di.telefono}`)
             .moveDown(1);
-
         // ---- INFORMACIÓN PARA FACTURACIÓN ----
         doc
             .fontSize(14)
@@ -115,7 +112,6 @@ async function generatePdfReport(variables) {
             .text('Información para Facturación', { underline: true })
             .fillColor('black')
             .moveDown(0.5);
-
         doc.fontSize(11)
             .text(`Nombre Encargado: ${fact.nombre_encargado}`)
             .text(`Puesto: ${fact.puesto}`)
@@ -126,7 +122,6 @@ async function generatePdfReport(variables) {
             .text(`Método de pago: ${fact.metodo_pago}`)
             .text(`Datos Adicionales: ${fact.datos_adicionales}`)
             .moveDown(1);
-
         // ---- INFORMACIÓN DE COBRANZA ----
         doc
             .fontSize(14)
@@ -134,7 +129,6 @@ async function generatePdfReport(variables) {
             .text('Información de Cobranza', { underline: true })
             .fillColor('black')
             .moveDown(0.5);
-
         doc.fontSize(11)
             .text(`Nombre Encargado: ${cob.nombre_encargado}`)
             .text(`Puesto: ${cob.puesto}`)
@@ -142,7 +136,6 @@ async function generatePdfReport(variables) {
             .text(`Celular: ${cob.celular}`)
             .text(`Correo Electrónico: ${cob.correo_electronico}`)
             .moveDown(1);
-
         // ---- INFORMACIÓN BANCARIA ----
         doc
             .fontSize(14)
@@ -150,13 +143,11 @@ async function generatePdfReport(variables) {
             .text('Información Bancaria', { underline: true })
             .fillColor('black')
             .moveDown(0.5);
-
         doc.fontSize(11)
             .text(`N° de Cuenta: ${banc.numero_cuenta}`)
             .text(`N° de Cuenta Clabe: ${banc.numero_cuenta_clabe}`)
             .text(`Banco: ${banc.banco}`)
             .moveDown(1);
-
         // ---- CONTACTO DE SITIO ----
         doc
             .fontSize(14)
@@ -164,7 +155,6 @@ async function generatePdfReport(variables) {
             .text('Contacto de Sitio', { underline: true })
             .fillColor('black')
             .moveDown(0.5);
-
         doc.fontSize(11)
             .text(`Ubicación: ${sitio.ubicacion}`)
             .text(`Coordenadas: ${sitio.coordenadas}`)
@@ -176,7 +166,6 @@ async function generatePdfReport(variables) {
             .text(`Megas Aproximados: ${sitio.megas_aproximados}`)
             .text(`Número de Enlaces: ${sitio.numero_enlaces}`)
             .moveDown(1);
-
         // ---- DATOS DEL VENDEDOR ----
         doc
             .fontSize(14)
@@ -184,20 +173,17 @@ async function generatePdfReport(variables) {
             .text('Datos del Vendedor', { underline: true })
             .fillColor('black')
             .moveDown(0.5);
-
         doc.fontSize(11)
             .text(`Nombre Vendedor: ${vend.nombre_vendedor}`)
             .text(`Oficina: ${vend.oficina}`)
             .text(`Correos: ${vend.correos}`)
             .text(`Celular Vendedor: ${vend.celular_vendedor}`)
             .moveDown(2);
-
         // Pie de página opcional
         doc
             .fontSize(10)
             .fillColor('#888')
             .text('--- Fin del Reporte ---', { align: 'center' });
-
         // Cerramos el documento (gatilla el evento 'end')
         doc.end();
     });
