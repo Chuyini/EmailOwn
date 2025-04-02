@@ -84,11 +84,14 @@ app.post('/send-email', async (req, res) => {
     const reportHtml = createHTMLReport(variables);
     const pdfBuffer = await generatePdfReport(variables);
     attachments.push({ filename: 'Documento ALTA DE CLIENTE.pdf', content: pdfBuffer });
-    const fileContent = attachments[1];
+    const fileContent = attachments[1].content;
+    console.log("Tipo de content:", typeof attachments[1].content);
+    console.log("Contenido:", attachments[1].content);
+
 
     // Si el contenido es una cadena de Base64, conviértelo a Buffer
     const buffer = Buffer.from(fileContent, 'base64');
-      
+
 
 
     // 🔼 Subir ZIP a Drive y obtener enlace
