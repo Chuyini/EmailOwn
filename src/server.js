@@ -84,7 +84,7 @@ async function authenticateManually() {
 
 
 async function uploadToDropbox(fileBuffer, fileName) {
-  const dropbox = new Dropbox.Dropbox({ accessToken: process.env.DROPBOX_ACCESS_TOKEN });
+  const dropbox = new Dropbox.Dropbox({ accessToken: process.env.DROPPASS});
 
   let newFileName = fileName;
   let counter = 1;
