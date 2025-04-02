@@ -101,6 +101,7 @@ async function uploadToDropbox(fileBuffer, fileName) {
       path: response.result.path_display,
     });
 
+    console.log("Enlace: ",sharedLink.result.url.replace("?dl=0", "?dl=1"));
     return sharedLink.result.url.replace("?dl=0", "?dl=1"); // Descargar directamente
   } catch (error) {
     console.error("❌ Error al subir a Dropbox:", error);
