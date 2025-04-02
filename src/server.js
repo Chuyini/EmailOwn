@@ -34,15 +34,19 @@ async function uploadToDrive(attachment, fileName, mimeType) {
     const buffer = Buffer.from(attachment.content, 'base64');
     console.log("✅ Buffer generado correctamente.");
 
+    // Convertir Buffer a Readable Stream
+    const stream = new PassThrough();
+    stream.end(buffer);
+
     // Autenticación con Google Drive
     const auth = new google.google.auth.GoogleAuth({
-      keyFile: './client.json',//<-- MISMA CARPETA
+      keyFile: 'client.json',
       scopes: ['https://www.googleapis.com/auth/drive.file'],
     });
 
     const drive = google.google.drive({ version: 'v3', auth });
 
-    // Subir el archivo directamente desde el Buffer
+    // Subir el archivo a Google Drive
     const response = await drive.files.create({
       requestBody: {
         name: fileName,
@@ -50,7 +54,7 @@ async function uploadToDrive(attachment, fileName, mimeType) {
       },
       media: {
         mimeType: mimeType,
-        body: buffer,  // 🔥 Envía el Buffer directamente
+        body: stream,  // 🔥 Ahora usamos un ReadableStream
       },
     });
 
@@ -60,7 +64,6 @@ async function uploadToDrive(attachment, fileName, mimeType) {
     console.error('❌ Error al subir archivo a Google Drive:', error);
   }
 }
-
 
 // 📩 Endpoint para enviar correo
 app.post('/send-email', async (req, res) => {
