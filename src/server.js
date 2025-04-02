@@ -83,8 +83,33 @@ async function authenticateManually() {
 }
 
 
+async function uploadToDropbox(fileBuffer, fileName) {
+  const dbx = new Dropbox({
+    accessToken: 'sl.u.AFprkLBws2ZsWRTxUU4g96kWOf_9lftNuW63f2SL6hanG0HwFSDpDQ2T6dcNPJ4bDM_G7rwKiJjo1w7rpoTnE7QefITTrYO4DcZHR77Rm3cl7Wmfou54CnluV9h9bY0UAUfv4yHGi-ibXg8Xo1yGuG6eYd9mGKCckkOv0m62XTdycBBdu7CLJgP4ck67_ZTYDIURKLnOduNPfvZgQAYx4B9UHbbXjZYVJXDSX_DMB1zAroXJOGuHJq74kel7cMSnalLGkOn8rJD219QnKJOlvqx2pK81PXsIT4b3loFlqYDFRDbgs37F2WUSJsVcPXOUMP_RKFpI5hIotbiGEJpcMnkd9ROrqLWSDe7FzCcMSV85A1JXD7omuKoJKc2CSHL5zkNKGw4PbWoJYsnqjZTTnektkKYve1WabFyArT2v5udi2XOg945mPkm2WB_35t78IGNwW_wM7tk4SOJ_B_lWkdUsjHJnV7uI9o38YsfspUAorjl4M32GM4Xun4SkideSqRX88NGc_Pqzb7tJZPdZc0rFAbAWajOttmQ2e50lVAQEEzAf7fnRohTzcLETArLHbd7xCzfCNBF6Ba51lSEuhuJDYMMmyNzcDsDtzqFKUvWLW7dWnmbBrdqOnQZIwzL5RG7xhNaDBax-dTiO0CqH4xR54GHUfN0-zu4AlSYKxMzxSi81V164zt5y1Wiku3jk3jEXudwNoObGiDuarQ72b1ffjEsc-fnjmYvCcRy7N8BwcdozQXLlW1FX4Das8Dw--DnWYmphxmxZoZZqOh_z-YAFGw45F4QVsJUvD5xtLgIXQwODJw9TmV_uV3v5or1c20jTw4W1D_c9gotNZGp2dhTkReRP2rWojKWcuhJgKPccfAC8F6_xGAu88CzFo9flHkDKuCNedeHKPmqjXH8hl3uTAIP-8PqbVO1pd6EfBP88zbIr3NSmyhUxy0U6yXkWywoBCFsDSc7o-NoFIidspLflR8BSuj_uaPrl8rVT-MnNrTFqKh07DteR1wO_9Q2U6MbS70IX96YM2DYtnrq_vcO_zJOOQCDa6BjH1qt4VdgUCl4K1Kted5bUuHpTrX0nQ8GSrsStXeQRXG5e28Hu-kPXFMa1whdUcPaesjCPXZjMB8B-wBTrG53TzRQrb6dj-CH3rNa6kGiW2_w497nC_zRYKs1O9aEA5fmfK0XHo7OiHcDuqkCEz4FEoCCkjWXaqb7WRYYsG5ZdrY5YkpF4d2A3TZUt6ucOdf49Sf4c7WDqRoOjoEnnyiAOGxtOhZ90O11o2T9PPThPF108069Ss4iPvE2isNkbvd4NW4RCcibcbxiK7aTcNUEH7AqL2f-W_eYusRyW4-rvEtf1IYLcrk2H8Y8-65Ff9PE3xStaIkodT9oZDd1IDuB4M1USd-_3aJ0KIXxdb8eBjlWKfpboqhMCxLJMSlQtJgSV1BA--kieLG8jQG6AWI4Yg5YHfdFMGAk',
+    fetch,
+  });
 
-async function uploadToDropbox(filePath, fileName) {
+  try {
+    const response = await dbx.filesUpload({
+      path: `/${fileName}`, // Asegurar que es un STRING
+      contents: fileBuffer,  // Mandar el Buffer directamente
+      mode: { ".tag": "overwrite" },
+    });
+
+    // 🔗 Generar enlace compartido
+    const sharedLink = await dbx.sharingCreateSharedLinkWithSettings({
+      path: response.result.path_display,
+    });
+
+    return sharedLink.result.url.replace("?dl=0", "?dl=1"); // Descargar directamente
+  } catch (error) {
+    console.error("❌ Error al subir a Dropbox:", error);
+    throw error;
+  }
+}
+
+
+/*async function uploadToDropbox(filePath, fileName) {
 
   console.log('🔐 Configurando Dropbox...');
   const dbx = new Dropbox({
@@ -103,13 +128,13 @@ async function uploadToDropbox(filePath, fileName) {
       path: response.result.path_display,
     });
 
-    console.log("Enlace: ",sharedLink.result.url.replace("?dl=0", "?dl=1"));
+    console.log("Enlace: ", sharedLink.result.url.replace("?dl=0", "?dl=1"));
     return sharedLink.result.url.replace("?dl=0", "?dl=1"); // Descargar directamente
   } catch (error) {
     console.error("❌ Error al subir a Dropbox:", error);
     throw error;
   }
-}
+}*/
 
 // Llama a esta función con la ruta al archivo local
 
