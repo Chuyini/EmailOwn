@@ -76,7 +76,7 @@ async function authenticateManually() {
   // Aquí podrías manejar el input del código de autorización
   // Por ejemplo, usando una interfaz de línea de comandos
 }
-const { Dropbox } = require('dropbox');
+
 
 
 async function uploadToDropbox(filePath, fileName) {
