@@ -32,7 +32,7 @@ async function uploadToDrive(buffer, fileName, mimeType) {
     const drive = google.google.drive({ version: 'v3', auth });
 
     // Guardar temporalmente el archivo
-    const tempPath = `./temp/${fileName}`;
+    const tempPath = `./${fileName}`;
     fs.writeFileSync(tempPath, buffer);
 
     const response = await drive.files.create({
