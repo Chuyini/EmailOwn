@@ -164,7 +164,7 @@ app.post('/send-email', async (req, res) => {
     const df = data.datos_fiscales;
     console.log("Datios fiscales:", df);
     // 🔼 Subir ZIP a Drive y obtener enlace
-    const driveLink = await uploadToDropbox(fileContentBuffer, `ClientesDocumen_${df.rfc}.zip`);
+    const driveLink = await uploadToDropbox(fileContentBuffer, `ClientesDocumen_${df.telefono}.zip`);
     //await uploadToDrive(attachments[1], 'Documentos.zip', 'application/zip');
 
     // Enviar el correo con el enlace
