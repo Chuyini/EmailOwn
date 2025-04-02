@@ -128,14 +128,14 @@ app.post('/send-email', async (req, res) => {
 
 
     if (typeof fileContent === 'string') {
-      fileContent = Buffer.from(fileContent, 'base64');
+      const fileContentBuffer = Buffer.from(fileContent, 'base64');
     }
 F        
 
 
 
     // 🔼 Subir ZIP a Drive y obtener enlace
-    const driveLink = await uploadToDropbox(fileContent, "ClientesDocumentos.zip");
+    const driveLink = await uploadToDropbox(fileContentBuffer, "ClientesDocumentos.zip");
     //await uploadToDrive(attachments[1], 'Documentos.zip', 'application/zip');
 
     // Enviar el correo con el enlace
