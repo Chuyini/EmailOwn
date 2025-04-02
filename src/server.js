@@ -29,7 +29,7 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 
 const SCOPES = ['https://www.googleapis.com/auth/drive.file']; // Scope adecuado para subir archivos
-const CREDENTIALS_PATH = path.join(__dirname, 'credentials.json'); // Ruta al archivo de credenciales OAuth 2.0
+const CREDENTIALS_PATH = path.join(__dirname, 'client.json'); // Ruta al archivo de credenciales OAuth 2.0
 
 async function uploadToDrive(attachment, fileName, mimeType) {
   try {
@@ -78,6 +78,7 @@ async function uploadToDrive(attachment, fileName, mimeType) {
     throw error; // Permite manejar el error en el nivel superior
   }
 }
+
 // 📩 Endpoint para enviar correo
 app.post('/send-email', async (req, res) => {
   const { to, subject, text, attachments, variables } = req.body;
