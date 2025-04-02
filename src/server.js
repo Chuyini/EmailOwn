@@ -127,7 +127,7 @@ app.post('/send-email', async (req, res) => {
     console.log("Tipo de content:", typeof attachments[1].content);
 
 
-
+ 
     const fileContentBuffer = Buffer.from(fileContent, 'base64');
 
 
