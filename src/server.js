@@ -7,6 +7,8 @@ const fs = require('fs');
 const google = require('googleapis');
 const { PassThrough } = require('stream');
 const app = express();
+const path = require('path');
+
 
 // Configurar CORS
 app.use(cors({
@@ -40,8 +42,9 @@ async function uploadToDrive(attachment, fileName, mimeType) {
 
     //const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
     // Autenticación con Google Drive
+    const route = path.join(__dirname,"client.json");
     const auth = new google.google.auth.GoogleAuth({
-      keyFile: './client.json',
+      keyFile: route,
       scopes: ['https://www.googleapis.com/auth/drive.file'],
     });
 
