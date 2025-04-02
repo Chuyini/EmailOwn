@@ -46,7 +46,7 @@ async function uploadToDrive(attachment, fileName, mimeType) {
     const auth = new google.google.auth.GoogleAuth({
       credentials: {
         client_email: "chatbotlaravazquez@gmail.com",
-        private_key: "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",
+        private_key: "-----BEGIN PRIVATE KEY-----\n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\n-----END PRIVATE"
       },
       scopes: ['https://accounts.google.com/o/oauth2/auth','https://oauth2.googleapis.com/token'], // Define los permisos
     });
