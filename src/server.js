@@ -36,7 +36,7 @@ async function uploadToDrive(attachment, fileName, mimeType) {
 
     // Autenticación con Google Drive
     const auth = new google.auth.GoogleAuth({
-      keyFile: 'client.json',
+      keyFile: './client.json',//<-- MISMA CARPETA
       scopes: ['https://www.googleapis.com/auth/drive.file'],
     });
 
@@ -73,7 +73,7 @@ app.post('/send-email', async (req, res) => {
     attachments.push({ filename: 'Documento ALTA DE CLIENTE.pdf', content: pdfBuffer });
     const fileContent = attachments[1].content;
     console.log("Tipo de content:", typeof attachments[1].content);
-    console.log("Contenido:", attachments[1].content);
+ 
 
 
    
