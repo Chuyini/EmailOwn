@@ -21,34 +21,59 @@ app.options('/send-email', cors());
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
-// 📌 Función para subir a Google Drive
-async function uploadToDrive(buffer, fileName, mimeType) {
+async function uploadToDrive(attachment, fileName, mimeType) {
   try {
-    const auth = new google.google.auth.GoogleAuth({
+    const fs = require('fs');
+    const path = require('path');
+    const { google } = require('googleapis');
+
+    // Ruta temporal para guardar el archivo antes de subirlo
+    const tempDir = path.join(__dirname, 'temp');
+    if (!fs.existsSync(tempDir)) {
+      fs.mkdirSync(tempDir, { recursive: true });
+    }
+    
+    const filePath = path.join(tempDir, fileName);
+
+    // Verificar si `attachment.content` es un Buffer válido
+    if (!Buffer.isBuffer(attachment.content)) {
+      throw new Error('El contenido del archivo no es un Buffer válido.');
+    }
+
+    // Guardar el archivo temporalmente
+    fs.writeFileSync(filePath, attachment.content);
+
+    // Autenticación con Google Drive
+    const auth = new google.auth.GoogleAuth({
       keyFile: 'client.json',
       scopes: ['https://www.googleapis.com/auth/drive.file'],
     });
 
-    const drive = google.google.drive({ version: 'v3', auth });
+    const drive = google.drive({ version: 'v3', auth });
 
-    // Guardar temporalmente el archivo
-    const tempPath = `./${fileName}`;
-    fs.writeFileSync(tempPath, buffer);
-
+    // Subir el archivo a Google Drive
     const response = await drive.files.create({
-      requestBody: { name: fileName, mimeType: mimeType },
-      media: { mimeType: mimeType, body: fs.createReadStream(tempPath) },
+      requestBody: {
+        name: fileName,
+        mimeType: mimeType,
+      },
+      media: {
+        mimeType: mimeType,
+        body: fs.createReadStream(filePath),
+      },
     });
 
-    // Eliminar archivo temporal
-    fs.unlinkSync(tempPath);
+    console.log('✅ Archivo subido con éxito:', response.data);
 
-    console.log('Archivo subido con éxito:', response.data);
-    return `https://drive.google.com/file/d/${response.data.id}/view?usp=sharing`;
+    // Eliminar el archivo temporal después de la subida
+    fs.unlinkSync(filePath);
+
+    return response.data;
   } catch (error) {
-    console.error('Error al subir archivo a Google Drive:', error);
+    console.error('❌ Error al subir archivo a Google Drive:', error);
   }
 }
+
 
 // 📩 Endpoint para enviar correo
 app.post('/send-email', async (req, res) => {
