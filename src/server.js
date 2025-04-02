@@ -46,11 +46,10 @@ async function uploadToDrive(attachment, fileName, mimeType) {
     const auth = new google.google.auth.GoogleAuth({
       credentials: {
         client_email: "chatbotlaravazquez@gmail.com",
-        private_key: "-----BEGIN PRIVATE KEY-----\n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\n-----END PRIVATE"
+        private_key: "-----BEGIN PRIVATE KEY-----\n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\n-----END PRIVATE KEY-----\n", // Asegúrate de incluir la clave completa
       },
-      scopes: ['https://accounts.google.com/o/oauth2/auth','https://oauth2.googleapis.com/token'], // Define los permisos
+      scopes: ['https://www.googleapis.com/auth/drive.file'], // Scope correcto para Google Drive
     });
-
     const drive = google.google.drive({ version: 'v3', auth });
 
     // Subir el archivo a Google Drive
