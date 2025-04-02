@@ -11,11 +11,13 @@ const path = require('path');
 const { authenticate } = require('@google-cloud/local-auth');
 
 
-// Configurar CORS
+const cors = require('cors');
+
+// Configurar CORS correctamente
 app.use(cors({
   origin: ['https://formulario-pd-net.vercel.app', 'http://localhost:4200', 'https://emailown-production.up.railway.app'], // Array de orígenes permitidos
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'OPTIONS'], // Métodos permitidos
+  allowedHeaders: ['Content-Type', 'Authorization'], // Encabezados permitidos
 }));
 // Manejar preflight (OPTIONS)
 app.options('/send-email', cors());
@@ -24,11 +26,7 @@ app.options('/send-email', cors());
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
-const fs = require('fs');
-const path = require('path');
-const { google } = require('googleapis');
-const { authenticate } = require('@google-cloud/local-auth');
-const { PassThrough } = require('stream');
+
 
 const SCOPES = ['https://www.googleapis.com/auth/drive.file']; // Scope adecuado para subir archivos
 const CREDENTIALS_PATH = path.join(__dirname, 'credentials.json'); // Ruta al archivo de credenciales OAuth 2.0
