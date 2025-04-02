@@ -40,7 +40,7 @@ async function uploadToDrive(attachment, fileName, mimeType) {
 
     // Autenticación con Google Drive
     const auth = new google.google.auth.GoogleAuth({
-      keyFile: 'client.json',
+      keyFile: './client.json',
       scopes: ['https://www.googleapis.com/auth/drive.file'],
     });
 
