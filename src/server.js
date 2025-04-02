@@ -84,30 +84,62 @@ async function authenticateManually() {
 
 
 async function uploadToDropbox(fileBuffer, fileName) {
-  const dbx = new Dropbox({
-    accessToken: process.env.DROPPASS,
-    fetch,
-  });
+  const dropbox = new Dropbox.Dropbox({ accessToken: process.env.DROPBOX_ACCESS_TOKEN });
+
+  let newFileName = fileName;
+  let counter = 1;
+
+  // 🔍 Verifica si el archivo ya existe y cambia el nombre si es necesario
+  while (await fileExists(dropbox, `/${newFileName}`)) {
+    const extension = fileName.includes('.') ? fileName.split('.').pop() : '';
+    const baseName = fileName.replace(`.${extension}`, '');
+    newFileName = `${baseName}_${counter}.${extension}`;
+    counter++;
+  }
 
   try {
-    const response = await dbx.filesUpload({
-      path: `/${fileName}`, // Asegurar que es un STRING
-      contents: fileBuffer,  // Mandar el Buffer directamente
-      mode: { ".tag": "overwrite" },
+    // 📤 Sube el archivo con el nuevo nombre
+    const response = await dropbox.filesUpload({
+      path: `/${newFileName}`,
+      contents: fileBuffer,
+      mode: { ".tag": "add" }, // Agrega sin sobrescribir
     });
 
-    // 🔗 Generar enlace compartido
-    const sharedLink = await dbx.sharingCreateSharedLinkWithSettings({
-      path: response.result.path_display,
-    });
-
-    console.log("Enlace: ", sharedLink.result.url.replace("?dl=0", "?dl=1"));
-    return sharedLink.result.url.replace("?dl=0", "?dl=1"); // Descargar directamente
+    // 🔗 Obtiene o crea un enlace compartido
+    const sharedLink = await getOrCreateSharedLink(dropbox, response.result.path_lower);
+    return sharedLink;
   } catch (error) {
     console.error("❌ Error al subir a Dropbox:", error);
     throw error;
   }
 }
+
+// 📂 Función para verificar si un archivo ya existe
+async function fileExists(dropbox, filePath) {
+  try {
+    await dropbox.filesGetMetadata({ path: filePath });
+    return true; // El archivo existe
+  } catch (error) {
+    if (error.status === 409) return false; // No existe
+    throw error;
+  }
+}
+
+// 🔗 Función para obtener o crear un enlace compartido
+async function getOrCreateSharedLink(dropbox, filePath) {
+  try {
+    const links = await dropbox.sharingListSharedLinks({ path: filePath });
+    if (links.result.links.length > 0) {
+      return links.result.links[0].url; // Devuelve el enlace existente
+    }
+    const sharedLink = await dropbox.sharingCreateSharedLinkWithSettings({ path: filePath });
+    return sharedLink.result.url;
+  } catch (error) {
+    console.error("❌ Error obteniendo o creando enlace compartido:", error);
+    throw error;
+  }
+}
+
 
 
 /*async function uploadToDropbox(filePath, fileName) {
