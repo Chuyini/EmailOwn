@@ -5,7 +5,7 @@ const cors = require('cors');
 const { generatePdfReport } = require('./pdfCreate');
 const fs = require('fs');
 const google = require('googleapis');
-
+const { PassThrough } = require('stream');
 const app = express();
 
 // Configurar CORS
