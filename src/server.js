@@ -29,6 +29,41 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 const SCOPES = ['https://www.googleapis.com/auth/drive.file']; // Scope adecuado para subir archivos
 const CREDENTIALS_PATH = path.join(__dirname, 'client.json'); // Ruta al archivo de credenciales OAuth 2.0
 
+async function authenticateManually() {
+  console.log("🔐 Autenticando con OAuth 2.0...");
+
+  // Proveer manualmente las credenciales
+  const oauth2Client = new google.google.auth.OAuth2(
+    '700814594423-eqqrhkhspm76lqnt5ltf8k4cv0rvoc3e.apps.googleusercontent.com', // Reemplaza con tu client_id
+    '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', // Reemplaza con tu client_secret
+    'https://emailown-production.up.railway.app' // Redirect URI configurado
+  );
+
+  // Generar URL para el flujo de autorización
+  const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
+  const authUrl = oauth2Client.generateAuthUrl({
+    access_type: 'offline',
+    scope: SCOPES,
+  });
+
+  console.log(`🔗 Autoriza la aplicación visitando esta URL: ${authUrl}`);
+  console.log("👉 Copia el código de autorización y pégalo aquí.");
+  // Aquí deberías recibir el código del usuario. Supongamos que se ingresa manualmente:
+  /*const code = "CÓDIGO_DE_AUTORIZACIÓN_DEL_USUARIO"; // Reemplaza con el código recibido
+
+  // Intercambiar el código por tokens
+  const { tokens } = await oauth2Client.getToken(code);
+  oauth2Client.setCredentials(tokens);
+
+  console.log('✅ Autenticación exitosa. Tokens:', tokens);
+  return oauth2Client;*/
+
+
+
+  // Aquí podrías manejar el input del código de autorización
+  // Por ejemplo, usando una interfaz de línea de comandos
+}
+
 async function uploadToDrive(attachment, fileName, mimeType) {
   try {
     console.log("📂 Verificando contenido del attachment...");
@@ -48,13 +83,10 @@ async function uploadToDrive(attachment, fileName, mimeType) {
 
     // Autenticación interactiva usando OAuth 2.0
     console.log("🔐 Autenticando con OAuth 2.0...");
-    const auth = await authenticate({
-      keyfilePath: CREDENTIALS_PATH,
-      scopes: SCOPES,
-    });
+    await authenticateManually().catch(console.error);
 
     // Inicializar el cliente de Google Drive
-    const drive = google.drive({ version: 'v3', auth });
+    const drive = google.google.drive({ version: 'v3', auth });
 
     // Subir el archivo a Google Drive
     const response = await drive.files.create({
