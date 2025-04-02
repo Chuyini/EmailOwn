@@ -8,7 +8,7 @@
         "client_secret": "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",
         "client_email": "chatbotlaravazquez@gmail.com",
         "redirect_uris": [
-            "https://formulario-pd-net.vercel.app/oauth2callback"
+            "https://emailown-production.up.railway.app/oauth2callback"
         ]
     }
 }
