@@ -38,6 +38,7 @@ async function uploadToDrive(attachment, fileName, mimeType) {
     const stream = new PassThrough();
     stream.end(buffer);
 
+    const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
     // Autenticación con Google Drive
     const auth = new google.google.auth.GoogleAuth({
       keyFile: './client.json',
