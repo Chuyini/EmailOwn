@@ -34,19 +34,6 @@ async function uploadToDrive(attachment, fileName, mimeType) {
     const buffer = Buffer.from(attachment.content, 'base64');
     console.log("✅ Buffer generado correctamente.");
 
-    // Crear carpeta temporal si no existe
-    const tempDir = path.join(__dirname, 'temp');
-    if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir, { recursive: true });
-    }
-
-    const filePath = path.join(tempDir, fileName);
-
-    // Guardar el archivo temporalmente
-    fs.writeFileSync(filePath, buffer);
-
-    console.log("📤 Subiendo archivo a Google Drive...");
-
     // Autenticación con Google Drive
     const auth = new google.auth.GoogleAuth({
       keyFile: 'client.json',
@@ -55,7 +42,7 @@ async function uploadToDrive(attachment, fileName, mimeType) {
 
     const drive = google.drive({ version: 'v3', auth });
 
-    // Subir el archivo a Google Drive
+    // Subir el archivo directamente desde el Buffer
     const response = await drive.files.create({
       requestBody: {
         name: fileName,
@@ -63,15 +50,11 @@ async function uploadToDrive(attachment, fileName, mimeType) {
       },
       media: {
         mimeType: mimeType,
-        body: fs.createReadStream(filePath),
+        body: buffer,  // 🔥 Envía el Buffer directamente
       },
-    });  
+    });
 
     console.log('✅ Archivo subido con éxito:', response.data);
-
-    // Eliminar el archivo temporal después de la subida
-    fs.unlinkSync(filePath);
-
     return response.data;
   } catch (error) {
     console.error('❌ Error al subir archivo a Google Drive:', error);
