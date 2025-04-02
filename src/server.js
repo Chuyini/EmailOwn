@@ -23,11 +23,18 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 async function uploadToDrive(attachment, fileName, mimeType) {
   try {
-    const fs = require('fs');
-    const path = require('path');
-    const { google } = require('googleapis');
+    console.log("📂 Verificando contenido del attachment...");
+    console.log("Tipo de attachment.content:", typeof attachment.content);
 
-    // Ruta temporal para guardar el archivo antes de subirlo
+    if (!attachment || !attachment.content) {
+      throw new Error('❌ El archivo no tiene contenido válido.');
+    }
+
+    // Convertir Base64 a Buffer
+    const buffer = Buffer.from(attachment.content, 'base64');
+    console.log("✅ Buffer generado correctamente.");
+
+    // Crear carpeta temporal si no existe
     const tempDir = path.join(__dirname, 'temp');
     if (!fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir, { recursive: true });
@@ -35,13 +42,10 @@ async function uploadToDrive(attachment, fileName, mimeType) {
 
     const filePath = path.join(tempDir, fileName);
 
-    // Verificar si `attachment.content` es un Buffer válido
-    if (!Buffer.isBuffer(attachment.content)) {
-      throw new Error('El contenido del archivo no es un Buffer válido.');
-    }
-
     // Guardar el archivo temporalmente
-    fs.writeFileSync(filePath, attachment.content);
+    fs.writeFileSync(filePath, buffer);
+
+    console.log("📤 Subiendo archivo a Google Drive...");
 
     // Autenticación con Google Drive
     const auth = new google.auth.GoogleAuth({
@@ -89,13 +93,12 @@ app.post('/send-email', async (req, res) => {
     console.log("Contenido:", attachments[1].content);
 
 
-    // Si el contenido es una cadena de Base64, conviértelo a Buffer
-    const buffer = Buffer.from(fileContent, 'base64');
+   
 
 
 
     // 🔼 Subir ZIP a Drive y obtener enlace
-    const driveLink = await uploadToDrive(buffer, 'Documentos.zip', 'application/zip');
+    const driveLink = await uploadToDrive(attachments[1], 'Documentos.zip', 'application/zip');
 
     // Enviar el correo con el enlace
     const emailBody = `${text} <br><br> <strong>Descarga tu archivo aquí:</strong> <a href="${driveLink}">${driveLink}</a>`;
