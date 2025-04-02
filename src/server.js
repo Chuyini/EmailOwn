@@ -35,12 +35,12 @@ async function uploadToDrive(attachment, fileName, mimeType) {
     console.log("✅ Buffer generado correctamente.");
 
     // Autenticación con Google Drive
-    const auth = new google.auth.GoogleAuth({
+    const auth = new google.google.auth.GoogleAuth({
       keyFile: './client.json',//<-- MISMA CARPETA
       scopes: ['https://www.googleapis.com/auth/drive.file'],
     });
 
-    const drive = google.drive({ version: 'v3', auth });
+    const drive = google.google.drive({ version: 'v3', auth });
 
     // Subir el archivo directamente desde el Buffer
     const response = await drive.files.create({
