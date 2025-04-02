@@ -58,7 +58,7 @@ async function uploadToDrive(attachment, fileName, mimeType) {
     });
 
     // Inicializar el cliente de Google Drive
-    const drive = google.google.drive({ version: 'v3', auth });
+    const drive = google.drive({ version: 'v3', auth });
 
     // Subir el archivo a Google Drive
     const response = await drive.files.create({
