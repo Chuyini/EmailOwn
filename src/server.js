@@ -26,6 +26,11 @@ app.options('/send-email', cors());
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
+// Iniciar el servidor
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Servidor de correos en http://localhost:${PORT}`);
+});
 
 
 const SCOPES = ['https://www.googleapis.com/auth/drive.file']; // Scope adecuado para subir archivos
@@ -182,11 +187,7 @@ async function sendEmail(to, subject, reportHtml, ...attachments) {
 }
 
 
-// Iniciar el servidor
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor de correos en http://localhost:${PORT}`);
-});
+
 
 function createHTMLReport(variables) {
   // Suponiendo que 'variables' es un array con un único objeto
