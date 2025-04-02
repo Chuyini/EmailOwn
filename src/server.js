@@ -44,8 +44,11 @@ async function uploadToDrive(attachment, fileName, mimeType) {
     // Autenticación con Google Drive
     const route = path.join(__dirname,"client.json");
     const auth = new google.google.auth.GoogleAuth({
-      keyFile: route,
-      scopes: ['https://www.googleapis.com/auth/drive.file'],
+      credentials: {
+        client_email: "chatbotlaravazquez@gmail.com",
+        private_key: "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",
+      },
+      scopes: ['https://accounts.google.com/o/oauth2/auth','https://oauth2.googleapis.com/token'], // Define los permisos
     });
 
     const drive = google.google.drive({ version: 'v3', auth });
