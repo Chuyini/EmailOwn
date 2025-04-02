@@ -9,6 +9,8 @@ const { PassThrough } = require('stream');
 const app = express();
 const path = require('path');
 const { authenticate } = require('@google-cloud/local-auth');
+const { Dropbox } = require('dropbox');
+
 
 
 // Configurar CORS correctamente
@@ -58,56 +60,59 @@ async function authenticateManually() {
   console.log('✅ Autenticación exitosa. Tokens:', tokens);
   return oauth2Client;*/
 
+  console.log(`🔗 Autoriza la aplicación visitando esta URL: ${authUrl}`);
+
+  const code = "CÓDIGO_DE_AUTORIZACIÓN_DEL_USUARIO"; // Reemplaza con el código recibido manualmente
+
+  // Intercambiar el código por tokens
+  const { tokens } = await oauth2Client.getToken(code);
+  oauth2Client.setCredentials(tokens);
+
+  console.log('✅ Autenticación exitosa. Tokens:', tokens);
+  return oauth2Client; // Retorna el cliente autenticado
+
 
 
   // Aquí podrías manejar el input del código de autorización
   // Por ejemplo, usando una interfaz de línea de comandos
 }
+const { Dropbox } = require('dropbox');
 
-async function uploadToDrive(attachment, fileName, mimeType) {
+
+async function uploadToDropbox(filePath, fileName) {
   try {
-    console.log("📂 Verificando contenido del attachment...");
-    console.log("Tipo de attachment.content:", typeof attachment.content);
-
-    if (!attachment || !attachment.content) {
-      throw new Error('❌ El archivo no tiene contenido válido.');
-    }
-
-    // Convertir Base64 a Buffer
-    const buffer = Buffer.from(attachment.content, 'base64');
-    console.log("✅ Buffer generado correctamente.");
-
-    // Convertir Buffer a Readable Stream
-    const stream = new PassThrough();
-    stream.end(buffer);
-
-    // Autenticación interactiva usando OAuth 2.0
-    console.log("🔐 Autenticando con OAuth 2.0...");
-    await authenticateManually().catch(console.error);
-
-    // Inicializar el cliente de Google Drive
-    const drive = google.google.drive({ version: 'v3', auth });
-
-    // Subir el archivo a Google Drive
-    const response = await drive.files.create({
-      requestBody: {
-        name: fileName,
-        mimeType: mimeType,
-      },
-      media: {
-        mimeType: mimeType,
-        body: stream, // ReadableStream
-      },
-      fields: 'id', // Solo queremos el ID del archivo como respuesta
+    console.log('🔐 Configurando Dropbox...');
+    const dbx = new Dropbox({
+      accessToken: 'sl.u.AFprkLBws2ZsWRTxUU4g96kWOf_9lftNuW63f2SL6hanG0HwFSDpDQ2T6dcNPJ4bDM_G7rwKiJjo1w7rpoTnE7QefITTrYO4DcZHR77Rm3cl7Wmfou54CnluV9h9bY0UAUfv4yHGi-ibXg8Xo1yGuG6eYd9mGKCckkOv0m62XTdycBBdu7CLJgP4ck67_ZTYDIURKLnOduNPfvZgQAYx4B9UHbbXjZYVJXDSX_DMB1zAroXJOGuHJq74kel7cMSnalLGkOn8rJD219QnKJOlvqx2pK81PXsIT4b3loFlqYDFRDbgs37F2WUSJsVcPXOUMP_RKFpI5hIotbiGEJpcMnkd9ROrqLWSDe7FzCcMSV85A1JXD7omuKoJKc2CSHL5zkNKGw4PbWoJYsnqjZTTnektkKYve1WabFyArT2v5udi2XOg945mPkm2WB_35t78IGNwW_wM7tk4SOJ_B_lWkdUsjHJnV7uI9o38YsfspUAorjl4M32GM4Xun4SkideSqRX88NGc_Pqzb7tJZPdZc0rFAbAWajOttmQ2e50lVAQEEzAf7fnRohTzcLETArLHbd7xCzfCNBF6Ba51lSEuhuJDYMMmyNzcDsDtzqFKUvWLW7dWnmbBrdqOnQZIwzL5RG7xhNaDBax-dTiO0CqH4xR54GHUfN0-zu4AlSYKxMzxSi81V164zt5y1Wiku3jk3jEXudwNoObGiDuarQ72b1ffjEsc-fnjmYvCcRy7N8BwcdozQXLlW1FX4Das8Dw--DnWYmphxmxZoZZqOh_z-YAFGw45F4QVsJUvD5xtLgIXQwODJw9TmV_uV3v5or1c20jTw4W1D_c9gotNZGp2dhTkReRP2rWojKWcuhJgKPccfAC8F6_xGAu88CzFo9flHkDKuCNedeHKPmqjXH8hl3uTAIP-8PqbVO1pd6EfBP88zbIr3NSmyhUxy0U6yXkWywoBCFsDSc7o-NoFIidspLflR8BSuj_uaPrl8rVT-MnNrTFqKh07DteR1wO_9Q2U6MbS70IX96YM2DYtnrq_vcO_zJOOQCDa6BjH1qt4VdgUCl4K1Kted5bUuHpTrX0nQ8GSrsStXeQRXG5e28Hu-kPXFMa1whdUcPaesjCPXZjMB8B-wBTrG53TzRQrb6dj-CH3rNa6kGiW2_w497nC_zRYKs1O9aEA5fmfK0XHo7OiHcDuqkCEz4FEoCCkjWXaqb7WRYYsG5ZdrY5YkpF4d2A3TZUt6ucOdf49Sf4c7WDqRoOjoEnnyiAOGxtOhZ90O11o2T9PPThPF108069Ss4iPvE2isNkbvd4NW4RCcibcbxiK7aTcNUEH7AqL2f-W_eYusRyW4-rvEtf1IYLcrk2H8Y8-65Ff9PE3xStaIkodT9oZDd1IDuB4M1USd-_3aJ0KIXxdb8eBjlWKfpboqhMCxLJMSlQtJgSV1BA--kieLG8jQG6AWI4Yg5YHfdFMGAk',
     });
 
-    console.log('✅ Archivo subido con éxito:', response.data);
-    return response.data;
+    console.log('📂 Leyendo archivo...');
+    const fileContent = fs.readFileSync(filePath);
+
+    console.log('⬆️ Subiendo archivo a Dropbox...');
+    const response = await dbx.filesUpload({
+      path: `/${fileName}`,
+      contents: fileContent,
+    });
+
+    console.log('✅ Archivo subido con éxito:', response.result);
+
+    console.log('🌍 Generando enlace compartido...');
+    const sharedLink = await dbx.sharingCreateSharedLinkWithSettings({
+      path: response.result.path_lower,
+    });
+
+    console.log('🔗 Enlace compartido:', sharedLink.result.url);
+    return sharedLink.result.url;
   } catch (error) {
-    console.error('❌ Error al subir archivo a Google Drive:', error);
-    throw error; // Permite manejar el error en el nivel superior
+    console.error('❌ Error al subir archivo:', error);
+    throw error;
   }
 }
+
+// Llama a esta función con la ruta al archivo local
+
+
 
 // 📩 Endpoint para enviar correo
 app.post('/send-email', async (req, res) => {
@@ -122,13 +127,16 @@ app.post('/send-email', async (req, res) => {
     console.log("Tipo de content:", typeof attachments[1].content);
 
 
-
-
+    if (typeof fileContent === 'string') {
+      fileContent = Buffer.from(fileContent, 'base64');
+    }
+F        
 
 
 
     // 🔼 Subir ZIP a Drive y obtener enlace
-    const driveLink = await uploadToDrive(attachments[1], 'Documentos.zip', 'application/zip');
+    const driveLink = await uploadToDropbox(fileContent, "ClientesDocumentos.zip");
+    //await uploadToDrive(attachments[1], 'Documentos.zip', 'application/zip');
 
     // Enviar el correo con el enlace
     const emailBody = `${text} <br><br> <strong>Descarga tu archivo aquí:</strong> <a href="${driveLink}">${driveLink}</a>`;
@@ -368,5 +376,48 @@ function createHTMLReport(variables) {
 
 
 
+async function uploadToDrive(attachment, fileName, mimeType) {
+  try {
+    console.log("📂 Verificando contenido del attachment...");
+    console.log("Tipo de attachment.content:", typeof attachment.content);
 
+    if (!attachment || !attachment.content) {
+      throw new Error('❌ El archivo no tiene contenido válido.');
+    }
+
+    // Convertir Base64 a Buffer
+    const buffer = Buffer.from(attachment.content, 'base64');
+    console.log("✅ Buffer generado correctamente.");
+
+    // Convertir Buffer a Readable Stream
+    const stream = new PassThrough();
+    stream.end(buffer);
+
+    // Autenticación interactiva usando OAuth 2.0
+    console.log("🔐 Autenticando con OAuth 2.0...");
+    await authenticateManually().catch(console.error);
+
+    // Inicializar el cliente de Google Drive
+    const drive = google.google.drive({ version: 'v3', auth });
+
+    // Subir el archivo a Google Drive
+    const response = await drive.files.create({
+      requestBody: {
+        name: fileName,
+        mimeType: mimeType,
+      },
+      media: {
+        mimeType: mimeType,
+        body: stream, // ReadableStream
+      },
+      fields: 'id', // Solo queremos el ID del archivo como respuesta
+    });
+
+    console.log('✅ Archivo subido con éxito:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error al subir archivo a Google Drive:', error);
+    throw error; // Permite manejar el error en el nivel superior
+  }
+}
 

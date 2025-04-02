@@ -16,6 +16,7 @@
     "axios": "^1.8.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
+    "dropbox": "^10.34.0",
     "express": "^4.21.2",
     "google-auth-library": "^9.15.1",
     "googleapis": "^105.0.0",
