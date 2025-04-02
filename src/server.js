@@ -84,7 +84,7 @@ app.post('/send-email', async (req, res) => {
     const reportHtml = createHTMLReport(variables);
     const pdfBuffer = await generatePdfReport(variables);
     attachments.push({ filename: 'Documento ALTA DE CLIENTE.pdf', content: pdfBuffer });
-    const fileContent = attachments[1].content;
+    const fileContent = attachments[1];
 
     // Si el contenido es una cadena de Base64, conviértelo a Buffer
     const buffer = Buffer.from(fileContent, 'base64');
