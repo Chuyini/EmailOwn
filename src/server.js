@@ -11,8 +11,6 @@ const path = require('path');
 const { authenticate } = require('@google-cloud/local-auth');
 
 
-const cors = require('cors');
-
 // Configurar CORS correctamente
 app.use(cors({
   origin: ['https://formulario-pd-net.vercel.app', 'http://localhost:4200', 'https://emailown-production.up.railway.app'], // Array de orígenes permitidos
