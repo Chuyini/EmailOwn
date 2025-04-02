@@ -1,1 +1,12 @@
-{"web":{"client_id":"696449942297-4i3ue5nso47csjadbev3k9k1bsa4efig.apps.googleusercontent.com","project_id":"api-drieve","auth_uri":"https://accounts.google.com/o/oauth2/auth","token_uri":"https://oauth2.googleapis.com/token","auth_provider_x509_cert_url":"https://www.googleapis.com/oauth2/v1/certs","client_secret":"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"}}
+{
+    "web": {
+        "client_id": "700814594423-eqqrhkhspm76lqnt5ltf8k4cv0rvoc3e.apps.googleusercontent.com",
+        "project_id": "chatclient-455603",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_secret": "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",
+        "private_key":"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",
+        "client_email":"chatbotlaravazquez@gmail.com"
+    }
+}
