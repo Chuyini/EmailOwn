@@ -33,66 +33,82 @@ app.listen(PORT, () => {
 });
 
 
+const SCOPES = ['https://www.googleapis.com/auth/drive.file']; // Scope adecuado para subir archivos
+const CREDENTIALS_PATH = path.join(__dirname, 'client.json'); // Ruta al archivo de credenciales OAuth 2.0
 
+async function authenticateManually() {
+  console.log("🔐 Autenticando con OAuth 2.0...");
+
+  // Proveer manualmente las credenciales
+  const oauth2Client = new google.google.auth.OAuth2(
+    '700814594423-eqqrhkhspm76lqnt5ltf8k4cv0rvoc3e.apps.googleusercontent.com', // Reemplaza con tu client_id
+    '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', // Reemplaza con tu client_secret
+    'https://emailown-production.up.railway.app' // Redirect URI configurado
+  );
+
+  // Generar URL para el flujo de autorización
+  const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
+  const authUrl = oauth2Client.generateAuthUrl({
+    access_type: 'offline',
+    scope: SCOPES,
+  });
+
+  console.log(`🔗 Autoriza la aplicación visitando esta URL: ${authUrl}`);
+  console.log("👉 Copia el código de autorización y pégalo aquí.");
+  // Aquí deberías recibir el código del usuario. Supongamos que se ingresa manualmente:
+  /*const code = "CÓDIGO_DE_AUTORIZACIÓN_DEL_USUARIO"; // Reemplaza con el código recibido
+
+  // Intercambiar el código por tokens
+  const { tokens } = await oauth2Client.getToken(code);
+  oauth2Client.setCredentials(tokens);
+
+  console.log('✅ Autenticación exitosa. Tokens:', tokens);
+  return oauth2Client;*/
+
+  console.log(`🔗 Autoriza la aplicación visitando esta URL: ${authUrl}`);
+
+  const code = "CÓDIGO_DE_AUTORIZACIÓN_DEL_USUARIO"; // Reemplaza con el código recibido manualmente
+
+  // Intercambiar el código por tokens
+  const { tokens } = await oauth2Client.getToken(code);
+  oauth2Client.setCredentials(tokens);
+
+  console.log('✅ Autenticación exitosa. Tokens:', tokens);
+  return oauth2Client; // Retorna el cliente autenticado
+
+
+
+  // Aquí podrías manejar el input del código de autorización
+  // Por ejemplo, usando una interfaz de línea de comandos
+}
 
 
 async function uploadToDropbox(fileBuffer, fileName) {
-  const dropbox = new Dropbox.Dropbox({ accessToken: process.env.DROPPASS});
-
-  let newFileName = fileName;
-  let counter = 1;
-
-  // 🔍 Verifica si el archivo ya existe y cambia el nombre si es necesario
-  while (await fileExists(dropbox, `/${newFileName}`)) {
-    const extension = fileName.includes('.') ? fileName.split('.').pop() : '';
-    const baseName = fileName.replace(`.${extension}`, '');
-    newFileName = `${baseName}_${counter}.${extension}`;
-    counter++;
-  }
+  const dbx = new Dropbox({
+    accessToken: process.env.DROPPASS,
+    fetch,
+  });
 
   try {
-    // 📤 Sube el archivo con el nuevo nombre
-    const response = await dropbox.filesUpload({
-      path: `/${newFileName}`,
-      contents: fileBuffer,
-      mode: { ".tag": "add" }, // Agrega sin sobrescribir
+    
+    const response = await dbx.filesUpload({
+      path: `/${fileName}`, // Asegurar que es un STRING
+      contents: fileBuffer,  // Mandar el Buffer directamente
+      mode: { ".tag": "overwrite" },
     });
 
-    // 🔗 Obtiene o crea un enlace compartido
-    const sharedLink = await getOrCreateSharedLink(dropbox, response.result.path_lower);
-    return sharedLink;
+    // 🔗 Generar enlace compartido
+    const sharedLink = await dbx.sharingCreateSharedLinkWithSettings({
+      path: response.result.path_display,
+    });
+
+    console.log("Enlace: ", sharedLink.result.url.replace("?dl=0", "?dl=1"));
+    return sharedLink.result.url.replace("?dl=0", "?dl=1"); // Descargar directamente
   } catch (error) {
     console.error("❌ Error al subir a Dropbox:", error);
     throw error;
   }
 }
-
-// 📂 Función para verificar si un archivo ya existe
-async function fileExists(dropbox, filePath) {
-  try {
-    await dropbox.filesGetMetadata({ path: filePath });
-    return true; // El archivo existe
-  } catch (error) {
-    if (error.status === 409) return false; // No existe
-    throw error;
-  }
-}
-
-// 🔗 Función para obtener o crear un enlace compartido
-async function getOrCreateSharedLink(dropbox, filePath) {
-  try {
-    const links = await dropbox.sharingListSharedLinks({ path: filePath });
-    if (links.result.links.length > 0) {
-      return links.result.links[0].url; // Devuelve el enlace existente
-    }
-    const sharedLink = await dropbox.sharingCreateSharedLinkWithSettings({ path: filePath });
-    return sharedLink.result.url;
-  } catch (error) {
-    console.error("❌ Error obteniendo o creando enlace compartido:", error);
-    throw error;
-  }
-}
-
 
 
 /*async function uploadToDropbox(filePath, fileName) {
@@ -384,6 +400,48 @@ function createHTMLReport(variables) {
 
 
 
+async function uploadToDrive(attachment, fileName, mimeType) {
+  try {
+    console.log("📂 Verificando contenido del attachment...");
+    console.log("Tipo de attachment.content:", typeof attachment.content);
 
+    if (!attachment || !attachment.content) {
+      throw new Error('❌ El archivo no tiene contenido válido.');
+    }
 
+    // Convertir Base64 a Buffer
+    const buffer = Buffer.from(attachment.content, 'base64');
+    console.log("✅ Buffer generado correctamente.");
+
+    // Convertir Buffer a Readable Stream
+    const stream = new PassThrough();
+    stream.end(buffer);
+
+    // Autenticación interactiva usando OAuth 2.0
+    console.log("🔐 Autenticando con OAuth 2.0...");
+    await authenticateManually().catch(console.error);
+
+    // Inicializar el cliente de Google Drive
+    const drive = google.google.drive({ version: 'v3', auth });
+
+    // Subir el archivo a Google Drive
+    const response = await drive.files.create({
+      requestBody: {
+        name: fileName,
+        mimeType: mimeType,
+      },
+      media: {
+        mimeType: mimeType,
+        body: stream, // ReadableStream
+      },
+      fields: 'id', // Solo queremos el ID del archivo como respuesta
+    });
+
+    console.log('✅ Archivo subido con éxito:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('❌ Error al subir archivo a Google Drive:', error);
+    throw error; // Permite manejar el error en el nivel superior
+  }
+}
 
