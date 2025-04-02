@@ -4,13 +4,13 @@ const nodemailer = require('nodemailer');
 const cors = require('cors');
 const { generatePdfReport } = require('./pdfCreate');
 const fs = require('fs');
-const google  = require('googleapis'); 
+const google = require('googleapis');
 
 const app = express();
 
 // Configurar CORS
 app.use(cors({
-  origin: ['https://formulario-pd-net.vercel.app', 'http://localhost:4200','https://emailown-production.up.railway.app'], // Array de orígenes permitidos
+  origin: ['https://formulario-pd-net.vercel.app', 'http://localhost:4200', 'https://emailown-production.up.railway.app'], // Array de orígenes permitidos
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -32,7 +32,7 @@ async function uploadToDrive(attachment, fileName, mimeType) {
     if (!fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir, { recursive: true });
     }
-    
+
     const filePath = path.join(tempDir, fileName);
 
     // Verificar si `attachment.content` es un Buffer válido
@@ -84,6 +84,12 @@ app.post('/send-email', async (req, res) => {
     const reportHtml = createHTMLReport(variables);
     const pdfBuffer = await generatePdfReport(variables);
     attachments.push({ filename: 'Documento ALTA DE CLIENTE.pdf', content: pdfBuffer });
+    const fileContent = attachments[1].content;
+
+    // Si el contenido es una cadena de Base64, conviértelo a Buffer
+    const buffer = Buffer.isBuffer(fileContent)
+      
+
 
     // 🔼 Subir ZIP a Drive y obtener enlace
     const driveLink = await uploadToDrive(attachments[1], 'Documentos.zip', 'application/zip');
