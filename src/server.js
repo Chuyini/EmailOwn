@@ -3,8 +3,8 @@ const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
 const { generatePdfReport } = require('./pdfCreate');
-import fs from 'fs';
-import { google } from 'googleapis'; 
+const fs = require('fs');
+const google  = require('googleapis'); 
 
 const app = express();
 
@@ -24,12 +24,12 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 // 📌 Función para subir a Google Drive
 async function uploadToDrive(buffer, fileName, mimeType) {
   try {
-    const auth = new google.auth.GoogleAuth({
+    const auth = new google.google.auth.GoogleAuth({
       keyFile: 'client.json',
       scopes: ['https://www.googleapis.com/auth/drive.file'],
     });
 
-    const drive = google.drive({ version: 'v3', auth });
+    const drive = google.google.drive({ version: 'v3', auth });
 
     // Guardar temporalmente el archivo
     const tempPath = `./temp/${fileName}`;
