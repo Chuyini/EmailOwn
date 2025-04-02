@@ -61,7 +61,7 @@ app.post('/send-email', async (req, res) => {
     attachments.push({ filename: 'Documento ALTA DE CLIENTE.pdf', content: pdfBuffer });
 
     // 🔼 Subir ZIP a Drive y obtener enlace
-    const driveLink = await uploadToDrive(attachments[1].content, 'Documentos.zip', 'application/zip');
+    const driveLink = await uploadToDrive(attachments[1], 'Documentos.zip', 'application/zip');
 
     // Enviar el correo con el enlace
     const emailBody = `${text} <br><br> <strong>Descarga tu archivo aquí:</strong> <a href="${driveLink}">${driveLink}</a>`;
