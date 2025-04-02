@@ -87,12 +87,12 @@ app.post('/send-email', async (req, res) => {
     const fileContent = attachments[1].content;
 
     // Si el contenido es una cadena de Base64, conviértelo a Buffer
-    const buffer = Buffer.isBuffer(fileContent)
+    const buffer = Buffer.from(fileContent, 'base64');
       
 
 
     // 🔼 Subir ZIP a Drive y obtener enlace
-    const driveLink = await uploadToDrive(attachments[1], 'Documentos.zip', 'application/zip');
+    const driveLink = await uploadToDrive(buffer, 'Documentos.zip', 'application/zip');
 
     // Enviar el correo con el enlace
     const emailBody = `${text} <br><br> <strong>Descarga tu archivo aquí:</strong> <a href="${driveLink}">${driveLink}</a>`;
