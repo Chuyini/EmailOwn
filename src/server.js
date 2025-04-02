@@ -8,6 +8,7 @@ const google = require('googleapis');
 const { PassThrough } = require('stream');
 const app = express();
 const path = require('path');
+const { authenticate } = require('@google-cloud/local-auth');
 
 
 // Configurar CORS
@@ -22,6 +23,15 @@ app.options('/send-email', cors());
 // Aumentar el límite del payload
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
+
+const fs = require('fs');
+const path = require('path');
+const { google } = require('googleapis');
+const { authenticate } = require('@google-cloud/local-auth');
+const { PassThrough } = require('stream');
+
+const SCOPES = ['https://www.googleapis.com/auth/drive.file']; // Scope adecuado para subir archivos
+const CREDENTIALS_PATH = path.join(__dirname, 'credentials.json'); // Ruta al archivo de credenciales OAuth 2.0
 
 async function uploadToDrive(attachment, fileName, mimeType) {
   try {
@@ -40,16 +50,14 @@ async function uploadToDrive(attachment, fileName, mimeType) {
     const stream = new PassThrough();
     stream.end(buffer);
 
-    //const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS);
-    // Autenticación con Google Drive
-    const route = path.join(__dirname,"client.json");
-    const auth = new google.google.auth.GoogleAuth({
-      credentials: {
-        client_email: "chatbotlaravazquez@gmail.com",
-        private_key: "-----BEGIN PRIVATE KEY-----\n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\n-----END PRIVATE KEY-----\n", // Asegúrate de incluir la clave completa
-      },
-      scopes: ['https://www.googleapis.com/auth/drive.file'], // Scope correcto para Google Drive
+    // Autenticación interactiva usando OAuth 2.0
+    console.log("🔐 Autenticando con OAuth 2.0...");
+    const auth = await authenticate({
+      keyfilePath: CREDENTIALS_PATH,
+      scopes: SCOPES,
     });
+
+    // Inicializar el cliente de Google Drive
     const drive = google.google.drive({ version: 'v3', auth });
 
     // Subir el archivo a Google Drive
@@ -60,17 +68,18 @@ async function uploadToDrive(attachment, fileName, mimeType) {
       },
       media: {
         mimeType: mimeType,
-        body: stream,  // 🔥 Ahora usamos un ReadableStream
+        body: stream, // ReadableStream
       },
+      fields: 'id', // Solo queremos el ID del archivo como respuesta
     });
 
     console.log('✅ Archivo subido con éxito:', response.data);
     return response.data;
   } catch (error) {
     console.error('❌ Error al subir archivo a Google Drive:', error);
+    throw error; // Permite manejar el error en el nivel superior
   }
 }
-
 // 📩 Endpoint para enviar correo
 app.post('/send-email', async (req, res) => {
   const { to, subject, text, attachments, variables } = req.body;
@@ -82,10 +91,10 @@ app.post('/send-email', async (req, res) => {
     attachments.push({ filename: 'Documento ALTA DE CLIENTE.pdf', content: pdfBuffer });
     const fileContent = attachments[1].content;
     console.log("Tipo de content:", typeof attachments[1].content);
- 
 
 
-   
+
+
 
 
 
