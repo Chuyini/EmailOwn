@@ -48,8 +48,9 @@ async function getAccessToken() {
 
 // Función para subir archivo a Dropbox
 async function uploadToDropbox(fileBuffer, fileName) {
+  console.log("Obteniendo la llave ...");
   const accessToken = await getAccessToken(); // Obtener nuevo token antes de subir
-
+  console.log("Termino de obtener la llaver");
   const dbx = new Dropbox({ accessToken, fetch });
 
   try {
