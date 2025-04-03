@@ -3,14 +3,9 @@ const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
 const { generatePdfReport } = require('./pdfCreate');
-const fs = require('fs');
-const google = require('googleapis');
-const { PassThrough } = require('stream');
 const app = express();
-const path = require('path');
-const { authenticate } = require('@google-cloud/local-auth');
 const { Dropbox } = require('dropbox');
-
+const fetch = require('node-fetch');
 
 
 // Configurar CORS correctamente
@@ -33,64 +28,31 @@ app.listen(PORT, () => {
 });
 
 
-const SCOPES = ['https://www.googleapis.com/auth/drive.file']; // Scope adecuado para subir archivos
-const CREDENTIALS_PATH = path.join(__dirname, 'client.json'); // Ruta al archivo de credenciales OAuth 2.0
-
-async function authenticateManually() {
-  console.log("🔐 Autenticando con OAuth 2.0...");
-
-  // Proveer manualmente las credenciales
-  const oauth2Client = new google.google.auth.OAuth2(
-    '700814594423-eqqrhkhspm76lqnt5ltf8k4cv0rvoc3e.apps.googleusercontent.com', // Reemplaza con tu client_id
-    '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', // Reemplaza con tu client_secret
-    'https://emailown-production.up.railway.app' // Redirect URI configurado
-  );
-
-  // Generar URL para el flujo de autorización
-  const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
-  const authUrl = oauth2Client.generateAuthUrl({
-    access_type: 'offline',
-    scope: SCOPES,
+// Función para obtener un nuevo access_token con refresh_token
+async function getAccessToken() {
+  const response = await fetch("https://api.dropbox.com/oauth2/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: process.env.DROPBOX_REFRESH_TOKEN,
+      client_id: process.env.DROPBOX_APP_KEY,
+      client_secret: process.env.DROPBOX_APP_SECRET,
+    }),
   });
 
-  console.log(`🔗 Autoriza la aplicación visitando esta URL: ${authUrl}`);
-  console.log("👉 Copia el código de autorización y pégalo aquí.");
-  // Aquí deberías recibir el código del usuario. Supongamos que se ingresa manualmente:
-  /*const code = "CÓDIGO_DE_AUTORIZACIÓN_DEL_USUARIO"; // Reemplaza con el código recibido
-
-  // Intercambiar el código por tokens
-  const { tokens } = await oauth2Client.getToken(code);
-  oauth2Client.setCredentials(tokens);
-
-  console.log('✅ Autenticación exitosa. Tokens:', tokens);
-  return oauth2Client;*/
-
-  console.log(`🔗 Autoriza la aplicación visitando esta URL: ${authUrl}`);
-
-  const code = "CÓDIGO_DE_AUTORIZACIÓN_DEL_USUARIO"; // Reemplaza con el código recibido manualmente
-
-  // Intercambiar el código por tokens
-  const { tokens } = await oauth2Client.getToken(code);
-  oauth2Client.setCredentials(tokens);
-
-  console.log('✅ Autenticación exitosa. Tokens:', tokens);
-  return oauth2Client; // Retorna el cliente autenticado
-
-
-
-  // Aquí podrías manejar el input del código de autorización
-  // Por ejemplo, usando una interfaz de línea de comandos
+  const data = await response.json();
+  if (!response.ok) throw new Error(`❌ Error al obtener access_token: ${data.error}`);
+  return data.access_token;
 }
 
-
+// Función para subir archivo a Dropbox
 async function uploadToDropbox(fileBuffer, fileName) {
-  const dbx = new Dropbox({
-    accessToken: process.env.DROPPASS,
-    fetch,
-  });
+  const accessToken = await getAccessToken(); // Obtener nuevo token antes de subir
+
+  const dbx = new Dropbox({ accessToken, fetch });
 
   try {
-    
     const response = await dbx.filesUpload({
       path: `/${fileName}`, // Asegurar que es un STRING
       contents: fileBuffer,  // Mandar el Buffer directamente
@@ -102,7 +64,7 @@ async function uploadToDropbox(fileBuffer, fileName) {
       path: response.result.path_display,
     });
 
-    console.log("Enlace: ", sharedLink.result.url.replace("?dl=0", "?dl=1"));
+    console.log("✅ Archivo subido. Enlace: ", sharedLink.result.url.replace("?dl=0", "?dl=1"));
     return sharedLink.result.url.replace("?dl=0", "?dl=1"); // Descargar directamente
   } catch (error) {
     console.error("❌ Error al subir a Dropbox:", error);
@@ -396,53 +358,5 @@ function createHTMLReport(variables) {
 </html>
 `;
   return htmlReport;
-}
-
-
-
-
-async function uploadToDrive(attachment, fileName, mimeType) {
-  try {
-    console.log("📂 Verificando contenido del attachment...");
-    console.log("Tipo de attachment.content:", typeof attachment.content);
-
-    if (!attachment || !attachment.content) {
-      throw new Error('❌ El archivo no tiene contenido válido.');
-    }
-
-    // Convertir Base64 a Buffer
-    const buffer = Buffer.from(attachment.content, 'base64');
-    console.log("✅ Buffer generado correctamente.");
-
-    // Convertir Buffer a Readable Stream
-    const stream = new PassThrough();
-    stream.end(buffer);
-
-    // Autenticación interactiva usando OAuth 2.0
-    console.log("🔐 Autenticando con OAuth 2.0...");
-    await authenticateManually().catch(console.error);
-
-    // Inicializar el cliente de Google Drive
-    const drive = google.google.drive({ version: 'v3', auth });
-
-    // Subir el archivo a Google Drive
-    const response = await drive.files.create({
-      requestBody: {
-        name: fileName,
-        mimeType: mimeType,
-      },
-      media: {
-        mimeType: mimeType,
-        body: stream, // ReadableStream
-      },
-      fields: 'id', // Solo queremos el ID del archivo como respuesta
-    });
-
-    console.log('✅ Archivo subido con éxito:', response.data);
-    return response.data;
-  } catch (error) {
-    console.error('❌ Error al subir archivo a Google Drive:', error);
-    throw error; // Permite manejar el error en el nivel superior
-  }
 }
 
