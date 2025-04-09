@@ -6,6 +6,7 @@ const { generatePdfReport } = require('./pdfCreate');
 const app = express();
 const { Dropbox } = require('dropbox');
 const fetch = require('node-fetch');
+const uid = require('uuid');
 
 
 // Configurar CORS correctamente
@@ -128,7 +129,7 @@ app.post('/send-email', async (req, res) => {
     const df = data.datos_fiscales;
     console.log("Datios fiscales:", df);
     // 🔼 Subir ZIP a Drive y obtener enlace
-    const driveLink = await uploadToDropbox(fileContentBuffer, `ClientesDocumen_${df.telefono}.zip`);
+    const driveLink = await uploadToDropbox(fileContentBuffer, `ClientesDocumen_${df.rfc}_${uid.v4}.zip`);
     //await uploadToDrive(attachments[1], 'Documentos.zip', 'application/zip');
 
     // Enviar el correo con el enlace
