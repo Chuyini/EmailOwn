@@ -119,6 +119,7 @@ app.post('/send-email', async (req, res) => {
     const fileContent = attachments[1].content;
     console.log("Tipo de content:", typeof attachments[1].content);
 
+    //el to es un arreglo con varios objetos
 
 
     const fileContentBuffer = Buffer.from(fileContent, 'base64');
@@ -141,7 +142,14 @@ app.post('/send-email', async (req, res) => {
 
     // Enviar el correo con el enlace
     const emailBody = `${text} <br><br> <strong>Descarga tu archivo aquí:</strong> <a href="${driveLink}">${driveLink}</a>`;
-    await sendEmail(to, subject, emailBody, attachments[0], attachments[2]);
+
+    for (const emailObject in to){
+
+      await sendEmail(emailObject.email, subject, emailBody, attachments[0], attachments[2]); //mandar los mismo atachments
+
+
+    }
+
 
     return res.status(200).json({ message: 'Correo enviado con éxito', driveLink });
   } catch (error) {
