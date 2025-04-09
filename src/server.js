@@ -129,7 +129,14 @@ app.post('/send-email', async (req, res) => {
     const df = data.datos_fiscales;
     console.log("Datios fiscales:", df);
     // 🔼 Subir ZIP a Drive y obtener enlace
-    const driveLink = await uploadToDropbox(fileContentBuffer, `ClientesDocumen_${df.rfc}_${uid.v4}.zip`);
+    // validacion:
+    const uniqueFileName = `ClientesDocument_${df.rfc}_${uid.v3}.zip`;
+    console.log("Nombre del archivo:", uniqueFileName);
+    if (fileName.includes("/") || fileName.includes("\\") || !fileName) {
+      throw new Error("Nombre del archivo contiene caracteres inválidos.");
+    }
+
+    const driveLink = await uploadToDropbox(fileContentBuffer, uniqueFileName);
     //await uploadToDrive(attachments[1], 'Documentos.zip', 'application/zip');
 
     // Enviar el correo con el enlace
