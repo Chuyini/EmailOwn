@@ -143,7 +143,7 @@ app.post('/send-email', async (req, res) => {
     // Enviar el correo con el enlace
     const emailBody = `${text} <br><br> <strong>Descarga tu archivo aquí:</strong> <a href="${driveLink}">${driveLink}</a>`;
 
-    for (const emailObject in to){
+    for (const emailObject of to){
 
       await sendEmail(emailObject.email, subject, emailBody, attachments[0], attachments[2]); //mandar los mismo atachments
 
