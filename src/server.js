@@ -130,9 +130,9 @@ app.post('/send-email', async (req, res) => {
     console.log("Datios fiscales:", df);
     // 🔼 Subir ZIP a Drive y obtener enlace
     // validacion:
-    const uniqueFileName = `ClientesDocument_${df.rfc}_${uid.v3}.zip`;
+    const uniqueFileName = `ClientesDocument_${df.rfc}_${uid.v3()}.zip`;
     console.log("Nombre del archivo:", uniqueFileName);
-    if (fileName.includes("/") || fileName.includes("\\") || !fileName) {
+    if (uniqueFileName.includes("/") || uniqueFileName.includes("\\") || !uniqueFileName) {
       throw new Error("Nombre del archivo contiene caracteres inválidos.");
     }
 
