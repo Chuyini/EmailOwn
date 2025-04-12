@@ -11,7 +11,7 @@ const uid = require('uuid');
 
 // Configurar CORS correctamente
 app.use(cors({
-  origin: ['https://formulario-pd-net.vercel.app', 'http://localhost:4200', 'https://emailown-production.up.railway.app'], // Array de orígenes permitidos
+  origin: ['https://formulario-pd-net.vercel.app', 'http://localhost:4200', 'https://emailown-production.up.railway.app','https://domiciliar-cliente.vercel.app'], // Array de orígenes permitidos
   methods: ['GET', 'POST', 'OPTIONS'], // Métodos permitidos
   allowedHeaders: ['Content-Type', 'Authorization'], // Encabezados permitidos
 }));
@@ -105,7 +105,7 @@ async function uploadToDropbox(fileBuffer, fileName) {
 
 // Llama a esta función con la ruta al archivo local
 
-
+//js
 
 // 📩 Endpoint para enviar correo
 app.post('/send-email', async (req, res) => {
@@ -157,6 +157,8 @@ app.post('/send-email', async (req, res) => {
     return res.status(500).json({ message: 'Error al enviar correo', error });
   }
 });
+
+// 📩 Endpoint para enviar correo por
 
 
 // 📧 Función para enviar correos
