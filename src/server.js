@@ -11,7 +11,7 @@ const uid = require('uuid');
 
 // Configurar CORS correctamente
 app.use(cors({
-  origin: ['https://formulario-pd-net.vercel.app', 'http://localhost:4200', 'https://emailown-production.up.railway.app','https://domiciliar-cliente.vercel.app'], // Array de orígenes permitidos
+  origin: ['https://formulario-pd-net.vercel.app', 'http://localhost:4200', 'https://emailown-production.up.railway.app', 'https://domiciliar-cliente.vercel.app'], // Array de orígenes permitidos
   methods: ['GET', 'POST', 'OPTIONS'], // Métodos permitidos
   allowedHeaders: ['Content-Type', 'Authorization'], // Encabezados permitidos
 }));
@@ -143,7 +143,7 @@ app.post('/send-email', async (req, res) => {
     // Enviar el correo con el enlace
     const emailBody = `${text} <br><br> <strong>Descarga tu archivo aquí:</strong> <a href="${driveLink}">${driveLink}</a>`;
 
-    for (const emailObject of to){
+    for (const emailObject of to) {
 
       await sendEmail(emailObject.email, subject, emailBody, attachments[0], attachments[2]); //mandar los mismo atachments
 
@@ -169,7 +169,7 @@ app.post('/send-email-domic', async (req, res) => {
     //const reportHtml = createHTMLReportDomic(variables);
     const pdfBuffer = await generatePdfReport(variables);
     attachments.push({ filename: 'Documento ALTA DE CLIENTE.pdf', content: pdfBuffer });
-   
+
     //el to es un arreglo con varios objetos
 
 
@@ -177,9 +177,9 @@ app.post('/send-email-domic', async (req, res) => {
 
 
 
-   console.log("Desde el servidor: ")
+    console.log("Desde el servidor: ")
     console.log(variables);
-  
+
     // 🔼 Subir ZIP a Drive y obtener enlace
     // validacion:
     /*const uniqueFileName = `ClientesDocument_${uid.v4()}.zip`;
@@ -202,7 +202,10 @@ app.post('/send-email-domic', async (req, res) => {
     }*/
 
 
-    return res.status(200).json({ message: 'Correo enviado con éxito', driveLink });
+    return res.status(200).json({
+      message: "Éxito",
+      detalle: "Operación completada satisfactoriamente (simulado)"
+    });
   } catch (error) {
     console.error('Error al enviar correo:', error);
     return res.status(500).json({ message: 'Error al enviar correo', error });
