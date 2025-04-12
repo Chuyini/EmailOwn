@@ -179,7 +179,7 @@ app.post('/send-email-domic', async (req, res) => {
 
 
 
-   
+   console.log("Desde el servidor: ")
     console.log(variables);
   
     // 🔼 Subir ZIP a Drive y obtener enlace
