@@ -11,12 +11,14 @@ const uid = require('uuid');
 
 // Configurar CORS correctamente
 app.use(cors({
-  origin: ['https://formulario-pd-net.vercel.app','https://domiciliar-cliente.vercel.app/', 'http://localhost:4200', 'https://emailown-production.up.railway.app', 'https://domiciliar-cliente.vercel.app'], // Array de orígenes permitidos
-  methods: ['GET', 'POST', 'OPTIONS'], // Métodos permitidos
-  allowedHeaders: ['Content-Type', 'Authorization'], // Encabezados permitidos
+  origin: ['https://formulario-pd-net.vercel.app', 'https://domiciliar-cliente.vercel.app', 'http://localhost:4200', 'https://emailown-production.up.railway.app'],
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
+
 // Manejar preflight (OPTIONS)
 app.options('/send-email', cors());
+app.options('/send-email-domic', cors());
 
 // Aumentar el límite del payload
 app.use(express.json({ limit: '100mb' }));
