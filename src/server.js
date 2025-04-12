@@ -158,7 +158,7 @@ app.post('/send-email', async (req, res) => {
   }
 });
 
-// 📩 Endpoint para enviar correo por
+
 
 // 📩 Endpoint para enviar correo
 app.post('/send-email-domic', async (req, res) => {
