@@ -169,8 +169,8 @@ app.post('/send-email-domic', async (req, res) => {
 
   try {
     //const reportHtml = createHTMLReportDomic(variables);
-    const pdfBuffer = await generatePdfReport(variables);
-    attachments.push({ filename: 'Documento ALTA DE CLIENTE.pdf', content: pdfBuffer });
+    //const pdfBuffer = await generatePdfReport(variables);
+   // attachments.push({ filename: 'Documento ALTA DE CLIENTE.pdf', content: pdfBuffer });
 
     //el to es un arreglo con varios objetos
 
