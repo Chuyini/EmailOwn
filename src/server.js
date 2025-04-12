@@ -11,7 +11,7 @@ const uid = require('uuid');
 
 // Configurar CORS correctamente
 app.use(cors({
-  origin: ['https://formulario-pd-net.vercel.app', 'http://localhost:4200', 'https://emailown-production.up.railway.app', 'https://domiciliar-cliente.vercel.app'], // Array de orígenes permitidos
+  origin: ['https://formulario-pd-net.vercel.app','https://domiciliar-cliente.vercel.app/', 'http://localhost:4200', 'https://emailown-production.up.railway.app', 'https://domiciliar-cliente.vercel.app'], // Array de orígenes permitidos
   methods: ['GET', 'POST', 'OPTIONS'], // Métodos permitidos
   allowedHeaders: ['Content-Type', 'Authorization'], // Encabezados permitidos
 }));
