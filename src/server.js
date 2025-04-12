@@ -169,13 +169,11 @@ app.post('/send-email-domic', async (req, res) => {
     //const reportHtml = createHTMLReportDomic(variables);
     const pdfBuffer = await generatePdfReport(variables);
     attachments.push({ filename: 'Documento ALTA DE CLIENTE.pdf', content: pdfBuffer });
-    const fileContent = attachments[1].content;
-    console.log("Tipo de content:", typeof attachments[1].content);
-
+   
     //el to es un arreglo con varios objetos
 
 
-    const fileContentBuffer = Buffer.from(fileContent, 'base64');
+    //const fileContentBuffer = Buffer.from(fileContent, 'base64');
 
 
 
