@@ -144,10 +144,11 @@ app.post('/send-email', async (req, res) => {
 
     // Enviar el correo con el enlace
     const emailBody = `${text} <br><br> <strong>Descarga tu archivo aquí:</strong> <a href="${driveLink}">${driveLink}</a>`;
+    
 
     for (const emailObject of to) {
 
-      await sendEmail(emailObject.email, subject, emailBody, attachments[0], attachments[2]); //mandar los mismo atachments
+      await sendEmail(emailObject.email, subject, emailBody, attachments[0], attachments[1],attachments[2]); //mandar los mismo atachments
 
 
     }
@@ -170,7 +171,7 @@ app.post('/send-email-domic', async (req, res) => {
   try {
     //const reportHtml = createHTMLReportDomic(variables);
     //const pdfBuffer = await generatePdfReport(variables);
-   // attachments.push({ filename: 'Documento ALTA DE CLIENTE.pdf', content: pdfBuffer });
+    // attachments.push({ filename: 'Documento ALTA DE CLIENTE.pdf', content: pdfBuffer });
 
     //el to es un arreglo con varios objetos
 
@@ -259,6 +260,17 @@ function createHTMLReport(variables) {
   const banc = data.informacion_bancaria;
   const sitio = data.contacto_sitio;
   const vend = data.datos_vendedor;
+
+  console.log("Datos Fiscales:", df);
+  console.log("Domicilio de Instalación:", di);
+  console.log("Información de Facturación:", fact);
+  console.log("Información de Cobranza:", cob);
+  console.log("Información Bancaria:", banc);
+  console.log("Contacto del Sitio:", sitio);
+  console.log("Datos del Vendedor:", vend);
+
+
+
 
   // Construimos un HTML con estilo más "formal y llamativo"
   const htmlReport = `
