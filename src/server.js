@@ -214,7 +214,7 @@ app.post('/send-email-domic', async (req, res) => {
   }
 });
 // 📧 Función para enviar correos
-async function sendEmailDomic(to, subject, reportHtml, ...attachments) {
+async function sendEmail(to, subject, reportHtml, ...attachments) {
   let transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
