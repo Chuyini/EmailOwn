@@ -120,6 +120,11 @@ app.post('/send-email', async (req, res) => {
     //const reportHtml = createHTMLReport(variables);
     //validacion de si esta vacio los archivos:
     let driveLink = null;
+    if (!Array.isArray(attachments)) {
+      console.error('Error: "attachments" no es un arreglo.', attachments);
+      return res.status(400).json({ message: '"attachments" debe ser un arreglo válido.' });
+    }
+  
 
     //para cada elemento que exista
     const trueAttachments = attachments.filter(item => item != null && item != undefined);
