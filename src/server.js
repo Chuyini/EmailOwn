@@ -148,7 +148,7 @@ app.post('/send-email', async (req, res) => {
 
     for (const emailObject of to) {
 
-      await sendEmail(emailObject.email, subject, emailBody, attachments[0], attachments[1],attachments[2]); //mandar los mismo atachments
+      await sendEmail(emailObject.email, subject, emailBody, attachments); //mandar los mismo atachments
 
 
     }
@@ -161,61 +161,8 @@ app.post('/send-email', async (req, res) => {
   }
 });
 
-
-
-// 📩 Endpoint para enviar correo
-app.post('/send-email-domic', async (req, res) => {
-  const { to, subject, text, attachments, variables } = req.body;
-  console.log("Desde el servidor se recibió el body:", req.body);
-
-  try {
-    //const reportHtml = createHTMLReportDomic(variables);
-    //const pdfBuffer = await generatePdfReport(variables);
-    // attachments.push({ filename: 'Documento ALTA DE CLIENTE.pdf', content: pdfBuffer });
-
-    //el to es un arreglo con varios objetos
-
-
-    //const fileContentBuffer = Buffer.from(fileContent, 'base64');
-
-
-
-    console.log("Desde el servidor: ")
-    console.log(variables);
-
-    // 🔼 Subir ZIP a Drive y obtener enlace
-    // validacion:
-    /*const uniqueFileName = `ClientesDocument_${uid.v4()}.zip`;
-    console.log("Nombre del archivo:", uniqueFileName);
-    if (uniqueFileName.includes("/") || uniqueFileName.includes("\\") || !uniqueFileName) {
-      throw new Error("Nombre del archivo contiene caracteres inválidos.");
-    }
-
-    const driveLink = await uploadToDropbox(fileContentBuffer, uniqueFileName);
-    //await uploadToDrive(attachments[1], 'Documentos.zip', 'application/zip');
-
-    // Enviar el correo con el enlace
-    const emailBody = `${text} <br><br> <strong>Descarga tu archivo aquí:</strong> <a href="${driveLink}">${driveLink}</a>`;
-
-    for (const emailObject of to){
-
-      await sendEmailDomic(emailObject.email, subject, emailBody, attachments[0], attachments[2]); //mandar los mismo atachments
-
-
-    }*/
-
-
-    return res.status(200).json({
-      message: "Éxito",
-      detalle: "Operación completada satisfactoriamente (simulado)"
-    });
-  } catch (error) {
-    console.error('Error al enviar correo:', error);
-    return res.status(500).json({ message: 'Error al enviar correo', error });
-  }
-});
 // 📧 Función para enviar correos
-async function sendEmail(to, subject, reportHtml, ...attachments) {
+async function sendEmail(to, subject, reportHtml, attachments) {
   let transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
