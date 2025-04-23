@@ -184,7 +184,7 @@ app.post('/send-email', async (req, res) => {
       );
       return res.status(200).json({ message: 'Correo enviado con éxito', driveLink });
     } else {
-      const emailBody = `${text} <br><br> <strong>No se subieron documentos .ZIP:</strong>`;
+      const emailBody = `${text} <br><br> <strong style = "color: blue">No se subieron documentos .ZIP :</strong>`;
       await Promise.all(
         to.map(emailObject => sendEmail(emailObject.email, subject, emailBody, trueAttachments))
       );
