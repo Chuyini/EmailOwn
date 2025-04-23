@@ -127,7 +127,7 @@ app.post('/send-email', async (req, res) => {
   
 
     //para cada elemento que exista
-    const trueAttachments = attachments.filter(item => item != null && item != undefined);
+    const trueAttachments = attachments.filter(item => item);
 
     if (trueAttachments.length > 0) {
 
