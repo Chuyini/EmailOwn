@@ -113,7 +113,7 @@ async function uploadToDropbox(fileBuffer, fileName) {
 app.post('/send-email', async (req, res) => {
   const { to, subject, text, attachments, variables } = req.body;
   console.log("Desde el servidor se recibió el body:", req.body);
-  console.log("Impresion de las variables ");
+ 
   printVariables(variables);
 
   try {
@@ -238,6 +238,7 @@ async function sendEmail(to, subject, reportHtml, attachments) {
 
 function printVariables(variables) {
   const data = variables[0];
+  console.log("Impresion de las variables: ");
 
   // Extraemos cada sección para simplificar
   const df = data.datos_fiscales;
