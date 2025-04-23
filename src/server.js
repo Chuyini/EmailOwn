@@ -113,6 +113,8 @@ async function uploadToDropbox(fileBuffer, fileName) {
 app.post('/send-email', async (req, res) => {
   const { to, subject, text, attachments, variables } = req.body;
   console.log("Desde el servidor se recibió el body:", req.body);
+  console.log("Impresion de las variables ");
+  printVariables(variables);
 
   try {
     //const reportHtml = createHTMLReport(variables);
@@ -227,6 +229,26 @@ async function sendEmail(to, subject, reportHtml, attachments) {
 }
 
 
+function printVariables(variables) {
+  const data = variables[0];
+
+  // Extraemos cada sección para simplificar
+  const df = data.datos_fiscales;
+  const di = data.domicilio_instalacion;
+  const fact = data.informacion_facturacion;
+  const cob = data.informacion_cobranza;
+  const banc = data.informacion_bancaria;
+  const sitio = data.contacto_sitio;
+  const vend = data.datos_vendedor;
+
+  console.log("Datos Fiscales (df):", df);
+  console.log("Domicilio de Instalación (di):", di);
+  console.log("Información de Facturación (fact):", fact);
+  console.log("Información de Cobranza (cob):", cob);
+  console.log("Información Bancaria (banc):", banc);
+  console.log("Contacto del Sitio (sitio):", sitio);
+  console.log("Datos del Vendedor (vend):", vend);
+}
 
 
 function createHTMLReport(variables) {
