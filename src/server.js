@@ -115,46 +115,80 @@ app.post('/send-email', async (req, res) => {
   console.log("Desde el servidor se recibió el body:", req.body);
 
   try {
-    const reportHtml = createHTMLReport(variables);
-    const pdfBuffer = await generatePdfReport(variables);
-    attachments.push({ filename: 'Documento ALTA DE CLIENTE.pdf', content: pdfBuffer });
-    const fileContent = attachments[1].content;
-    console.log("Tipo de content:", typeof attachments[1].content);
+    //const reportHtml = createHTMLReport(variables);
+    //validacion de si esta vacio los archivos:
+    let driveLink = null;
+
+    //para cada elemento que exista
+    const trueAttachments = attachments.filter(item => item != null && item != undefined);
+
+    if (trueAttachments.length > 0) {
+
+      for (const item of trueAttachments) {
+
+        if (item.filename.endsWith('.zip')) {
+          const fileContent = item.content;
+          console.log("Tipo de content:", typeof item.content);
+          const fileContentBuffer = Buffer.from(fileContent, 'base64');
+          const data = variables[0];
+          const df = data.datos_fiscales;
+          console.log("Datios fiscales:", df);
+          const uniqueFileName = `ClientesDocument_${df.rfc}_${uid.v4()}.zip`;
+          console.log("Nombre del archivo:", uniqueFileName);
+          if (uniqueFileName.includes("/") || uniqueFileName.includes("\\") || !uniqueFileName) {
+            throw new Error("Nombre del archivo contiene caracteres inválidos.");
+          }
+
+          driveLink = await uploadToDropbox(fileContentBuffer, uniqueFileName);
+        }
+
+      }
+    }
+
+
+    //const fileContent = attachments[1].content;
+    //console.log("Tipo de content:", typeof attachments[1].content);
 
     //el to es un arreglo con varios objetos
 
 
-    const fileContentBuffer = Buffer.from(fileContent, 'base64');
+    //const fileContentBuffer = Buffer.from(fileContent, 'base64');
 
 
+    const pdfBuffer = await generatePdfReport(variables);//generamos el PDF DEL ALTA DE CLIENTE
+    trueAttachments.unshift({ filename: 'Documento ALTA DE CLIENTE.pdf', content: pdfBuffer });//queda en la posicion 0
 
-    const data = variables[0];
-    const df = data.datos_fiscales;
-    console.log("Datios fiscales:", df);
+    /*const data = variables[0];
+    const df = data.datos_fiscales;*/
+    // console.log("Datios fiscales:", df);
     // 🔼 Subir ZIP a Drive y obtener enlace
     // validacion:
-    const uniqueFileName = `ClientesDocument_${df.rfc}_${uid.v4()}.zip`;
-    console.log("Nombre del archivo:", uniqueFileName);
+    //const uniqueFileName = `ClientesDocument_${df.rfc}_${uid.v4()}.zip`;
+    /*console.log("Nombre del archivo:", uniqueFileName);
     if (uniqueFileName.includes("/") || uniqueFileName.includes("\\") || !uniqueFileName) {
       throw new Error("Nombre del archivo contiene caracteres inválidos.");
-    }
+    }*/
 
-    const driveLink = await uploadToDropbox(fileContentBuffer, uniqueFileName);
-    //await uploadToDrive(attachments[1], 'Documentos.zip', 'application/zip');
+    //const driveLink = await uploadToDropbox(fileContentBuffer, uniqueFileName);
 
     // Enviar el correo con el enlace
-    const emailBody = `${text} <br><br> <strong>Descarga tu archivo aquí:</strong> <a href="${driveLink}">${driveLink}</a>`;
-    
-
-    for (const emailObject of to) {
-
-      await sendEmail(emailObject.email, subject, emailBody, attachments); //mandar los mismo atachments
-
-
+    //to contiene todo los correos 
+    //map sirve para hacer algo con cada elemntp de un arreglo
+    //Promise all es para manejar concurrencia y optmizar utiempo
+    if (driveLink != null) {
+      const emailBody = `${text} <br><br> <strong>Descarga tu archivo aquí:</strong> <a href="${driveLink}">${driveLink}</a>`;
+      await Promise.all(
+        to.map(emailObject => sendEmail(emailObject.email, subject, emailBody, trueAttachments))
+      );
+      return res.status(200).json({ message: 'Correo enviado con éxito', driveLink });
+    } else {
+      const emailBody = `${text} <br><br> <strong>No se subieron documentos .ZIP:</strong>`;
+      await Promise.all(
+        to.map(emailObject => sendEmail(emailObject.email, subject, emailBody, trueAttachments))
+      );
+      return res.status(200).json({ message: 'Correo enviado con éxito sin enlace' });
     }
 
-
-    return res.status(200).json({ message: 'Correo enviado con éxito', driveLink });
   } catch (error) {
     console.error('Error al enviar correo:', error);
     return res.status(500).json({ message: 'Error al enviar correo', error });
