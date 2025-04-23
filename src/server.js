@@ -124,7 +124,7 @@ app.post('/send-email', async (req, res) => {
       console.error('Error: "attachments" no es un arreglo.', attachments);
       return res.status(400).json({ message: '"attachments" debe ser un arreglo válido.' });
     }
-  
+
 
     //para cada elemento que exista
     const trueAttachments = attachments.filter(item => item);
@@ -248,13 +248,13 @@ function printVariables(variables) {
   const sitio = data.contacto_sitio;
   const vend = data.datos_vendedor;
 
-  console.log("Datos Fiscales (df):", df);
-  console.log("Domicilio de Instalación (di):", di);
-  console.log("Información de Facturación (fact):", fact);
-  console.log("Información de Cobranza (cob):", cob);
-  console.log("Información Bancaria (banc):", banc);
-  console.log("Contacto del Sitio (sitio):", sitio);
-  console.log("Datos del Vendedor (vend):", vend);
+  console.log("Datos Fiscales (df):", JSON.stringify(df, null, 2));
+  console.log("Domicilio de Instalación (di):", JSON.stringify(di, null, 2));
+  console.log("Información de Facturación (fact):", JSON.stringify(fact, null, 2));
+  console.log("Información de Cobranza (cob):", JSON.stringify(cob, null, 2));
+  console.log("Información Bancaria (banc):", JSON.stringify(banc, null, 2));
+  console.log("Contacto del Sitio (sitio):", JSON.stringify(sitio, null, 2));
+  console.log("Datos del Vendedor (vend):", JSON.stringify(vend, null, 2));
 }
 
 
