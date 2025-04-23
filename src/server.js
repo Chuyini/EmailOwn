@@ -219,7 +219,7 @@ async function sendEmail(to, subject, reportHtml, attachments) {
     to,
     subject,
     html: reportHtml,
-    attachments: attachments.filter(a => a)
+    attachments: attachments
   };
 
   return new Promise((resolve, reject) => {
@@ -238,7 +238,7 @@ async function sendEmail(to, subject, reportHtml, attachments) {
 
 function printVariables(variables) {
   const data = variables[0];
-  console.log("Impresion de las variables: ");
+  console.log("Impresion de las variables:");
 
   // Extraemos cada sección para simplificar
   const df = data.datos_fiscales;
