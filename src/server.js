@@ -128,6 +128,7 @@ app.post('/send-email', async (req, res) => {
 
     //para cada elemento que exista
     const trueAttachments = attachments.filter(item => item);
+    let zip;
 
     if (trueAttachments.length > 0) {
 
@@ -145,7 +146,7 @@ app.post('/send-email', async (req, res) => {
           if (uniqueFileName.includes("/") || uniqueFileName.includes("\\") || !uniqueFileName) {
             throw new Error("Nombre del archivo contiene caracteres inválidos.");
           }
-
+          zip = item;
           driveLink = await uploadToDropbox(fileContentBuffer, uniqueFileName);
         }
 
@@ -163,7 +164,8 @@ app.post('/send-email', async (req, res) => {
 
 
     const pdfBuffer = await generatePdfReport(variables);//generamos el PDF DEL ALTA DE CLIENTE
-    trueAttachments.unshift({ filename: 'Documento ALTA DE CLIENTE.pdf', content: pdfBuffer });//queda en la posicion 0
+    const validateAttachments = trueAttachments.filter(a => a !== zip) // Elimina todas las ocurrencias de `zip`
+    validateAttachments.unshift({ filename: 'Documento ALTA DE CLIENTE.pdf', content: pdfBuffer });//queda en la posicion 0
 
     /*const data = variables[0];
     const df = data.datos_fiscales;*/
@@ -185,13 +187,13 @@ app.post('/send-email', async (req, res) => {
     if (driveLink != null) {
       const emailBody = `${text} <br><br> <strong>Descarga tu archivo aquí:</strong> <a href="${driveLink}">${driveLink}</a>`;
       await Promise.all(
-        to.map(emailObject => sendEmail(emailObject.email, subject, emailBody, trueAttachments[0]))
+        to.map(emailObject => sendEmail(emailObject.email, subject, emailBody, validateAttachments))
       );
       return res.status(200).json({ message: 'Correo enviado con éxito', driveLink });
     } else {
       const emailBody = `${text} <br><br> <strong style = "color: blue">No se subieron documentos .ZIP :</strong>`;
       await Promise.all(
-        to.map(emailObject => sendEmail(emailObject.email, subject, emailBody, trueAttachments[0]))
+        to.map(emailObject => sendEmail(emailObject.email, subject, emailBody, validateAttachments))
       );
       return res.status(200).json({ message: 'Correo enviado con éxito sin enlace' });
     }
