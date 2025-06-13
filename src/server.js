@@ -113,7 +113,7 @@ async function uploadToDropbox(fileBuffer, fileName) {
 app.post('/send-email', async (req, res) => {
   const { to, subject, text, attachments, variables } = req.body;
   console.log("Desde el servidor se recibió el body:", req.body);
- 
+
   printVariables(variables);
 
   try {
@@ -211,7 +211,7 @@ app.post('/send-email', async (req, res) => {
 app.post('/send-email-domic', async (req, res) => {
   const { to, subject, text, attachments, variables } = req.body;
   console.log("Desde el servidor se recibió el body:", req.body);
- 
+
   printVariables(variables);
 
   try {
@@ -236,8 +236,8 @@ app.post('/send-email-domic', async (req, res) => {
           const fileContent = item.content;
           console.log("Tipo de content:", typeof item.content);
           const fileContentBuffer = Buffer.from(fileContent, 'base64');
-          
-      
+
+
           const uniqueFileName = `ClientesDocument_Domic_${uid.v4()}.zip`;
           console.log("Nombre del archivo:", uniqueFileName);
           if (uniqueFileName.includes("/") || uniqueFileName.includes("\\") || !uniqueFileName) {
@@ -255,15 +255,15 @@ app.post('/send-email-domic', async (req, res) => {
     const validateAttachments = trueAttachments.filter(a => a !== zip) // Elimina todas las ocurrencias de `zip`
     validateAttachments.unshift({ filename: 'Documento DOMICILIACION DE CLIENTE.pdf', content: pdfBuffer });//queda en la posicion 0
 
-  
+
     if (driveLink != null) {
       const emailBody = `${text} <br><br> <strong>Descarga tu archivo aquí:</strong> <a href="${driveLink}">${driveLink}</a>`;
-      await sendEmail(emailObject.email, subject, emailBody, validateAttachments);
-      
+      await sendEmail(to, subject, emailBody, validateAttachments);
+
       return res.status(200).json({ message: 'Correo enviado con éxito', driveLink });
     } else {
       const emailBody = `${text} <br><br> <strong style = "color: blue">No se subieron documentos .ZIP :</strong>`;
-      await sendEmail(emailObject.email, subject, emailBody, validateAttachments);
+      await sendEmail(to, subject, emailBody, validateAttachments);
       return res.status(200).json({ message: 'Correo enviado con éxito sin enlace' });
     }
 
