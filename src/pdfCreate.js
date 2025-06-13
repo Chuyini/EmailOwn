@@ -12,10 +12,10 @@ const fs = require('fs');
  */
 async function generatePdfReport(variables) {
 
-      // 1. Descargamos la imagen de la nube (Google Drive, etc.)
-  const response = await axios.get('https://drive.google.com/uc?export=view&id=1v6uI_38OqosSeTBOWJW2M09ZD9JolvYn', { responseType: 'arraybuffer' });
-  // Convertimos el 'arraybuffer' a Buffer
-  const imageBuffer = Buffer.from(response.data, 'binary');
+    // 1. Descargamos la imagen de la nube (Google Drive, etc.)
+    const response = await axios.get('https://drive.google.com/uc?export=view&id=1v6uI_38OqosSeTBOWJW2M09ZD9JolvYn', { responseType: 'arraybuffer' });
+    // Convertimos el 'arraybuffer' a Buffer
+    const imageBuffer = Buffer.from(response.data, 'binary');
 
     return new Promise((resolve, reject) => {
         // Suponiendo que 'variables' es un array con un único objeto
@@ -189,6 +189,68 @@ async function generatePdfReport(variables) {
     });
 }
 
+
+async function generatePdfReportDomic(variables) {
+
+    const response = await axios.get(
+        "https://drive.google.com/uc?export=view&id=1v6uI_38OqosSeTBOWJW2M09ZD9JolvYn",
+        { responseType: "arraybuffer" }
+    );
+    const imageBuffer = Buffer.from(response.data, "binary");
+
+    return new Promise((resolve, reject) => {
+        const data = variables[0]; // Extraemos el objeto principal
+
+        const doc = new jsPDF();
+
+        let y = 10; // Posición vertical inicial
+        const addLine = (text, space = 10) => {
+            doc.text(text, 10, y);
+            y += space;
+        };
+
+        // Insertar imagen
+        const imgData = `data:image/png;base64,${imageBuffer.toString("base64")}`;
+        doc.addImage(imgData, "PNG", 10, y, 50, 20);
+        y += 30;
+
+        // Sección: Encabezado
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "bold");
+        addLine("DOCUMENTO DE ALTA DE CLIENTE");
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        addLine(`Fecha: ${new Date().toLocaleDateString()}`);
+        addLine(`Hora: ${new Date().toLocaleTimeString()}`);
+        addLine(`Entidad: ${data.entidad}`);
+        addLine(`Teléfono: ${data.telPerson}`);
+        addLine(`Email: ${data.emailPerson}`);
+        addLine("----------------------------------------");
+
+        // Datos del Cliente
+        addLine(`Nombre del Cliente: ${data.numNameClient}`);
+        addLine(`Tipo de Servicio: ${data.typeServiceSelected}`);
+        addLine(`Plazo de Contratación: ${data.hiringPeriodSelected}`);
+        addLine(`Titular de la Cuenta: ${data.holder}`);
+        addLine(`Número de Cuenta: ${data.numAccount}`);
+        addLine(`Fecha de Vencimiento: ${data.dueDate}`);
+        addLine(`Domicilio: ${data.address}`);
+        addLine(`Cantidad Total: ${data.cantT}`);
+        addLine(`Días de Cargo: ${data.dayPaySelected}`);
+        addLine("----------------------------------------");
+
+        // Sección: Términos y Condiciones
+        addLine("Términos y Condiciones:");
+        addLine("1. El cliente acepta los términos y condiciones del servicio.");
+
+        // Convertir a Blob y resolver la Promesa
+        const pdfBlob = doc.output("blob");
+        resolve(pdfBlob);
+    });
+
+
+}
+
 module.exports = {
-    generatePdfReport
+    generatePdfReport, generatePdfReportDomic
 };

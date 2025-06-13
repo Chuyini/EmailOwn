@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const nodemailer = require('nodemailer');
 const cors = require('cors');
-const { generatePdfReport } = require('./pdfCreate');
+const { generatePdfReport, generatePdfReportDomic } = require('./pdfCreate');
 const app = express();
 const { Dropbox } = require('dropbox');
 const fetch = require('node-fetch');
@@ -203,6 +203,81 @@ app.post('/send-email', async (req, res) => {
     return res.status(500).json({ message: 'Error al enviar correo', error });
   }
 });
+
+
+
+
+
+app.post('/send-email-domic', async (req, res) => {
+  const { to, subject, text, attachments, variables } = req.body;
+  console.log("Desde el servidor se recibió el body:", req.body);
+ 
+  printVariables(variables);
+
+  try {
+    //const reportHtml = createHTMLReport(variables);
+    //validacion de si esta vacio los archivos:
+    let driveLink = null;
+    if (!Array.isArray(attachments)) {
+      console.error('Error: "attachments" no es un arreglo.', attachments);
+      return res.status(400).json({ message: '"attachments" debe ser un arreglo válido.' });
+    }
+
+
+    //para cada elemento que exista
+    const trueAttachments = attachments.filter(item => item);
+    let zip;
+
+    if (trueAttachments.length > 0) {
+
+      for (const item of trueAttachments) {
+
+        if (item.filename.endsWith('.zip')) {
+          const fileContent = item.content;
+          console.log("Tipo de content:", typeof item.content);
+          const fileContentBuffer = Buffer.from(fileContent, 'base64');
+          
+      
+          const uniqueFileName = `ClientesDocument_Domic_${uid.v4()}.zip`;
+          console.log("Nombre del archivo:", uniqueFileName);
+          if (uniqueFileName.includes("/") || uniqueFileName.includes("\\") || !uniqueFileName) {
+            throw new Error("Nombre del archivo contiene caracteres inválidos.");
+          }
+          zip = item;
+          driveLink = await uploadToDropbox(fileContentBuffer, uniqueFileName);
+        }
+
+      }
+    }
+
+
+    const pdfBuffer = await generatePdfReportDomic(variables);//generamos el PDF DEL ALTA DE CLIENTE
+    const validateAttachments = trueAttachments.filter(a => a !== zip) // Elimina todas las ocurrencias de `zip`
+    validateAttachments.unshift({ filename: 'Documento DOMICILIACION DE CLIENTE.pdf', content: pdfBuffer });//queda en la posicion 0
+
+  
+    if (driveLink != null) {
+      const emailBody = `${text} <br><br> <strong>Descarga tu archivo aquí:</strong> <a href="${driveLink}">${driveLink}</a>`;
+      await sendEmail(emailObject.email, subject, emailBody, validateAttachments);
+      
+      return res.status(200).json({ message: 'Correo enviado con éxito', driveLink });
+    } else {
+      const emailBody = `${text} <br><br> <strong style = "color: blue">No se subieron documentos .ZIP :</strong>`;
+      await sendEmail(emailObject.email, subject, emailBody, validateAttachments);
+      return res.status(200).json({ message: 'Correo enviado con éxito sin enlace' });
+    }
+
+  } catch (error) {
+    console.error('Error al enviar correo:', error);
+    return res.status(500).json({ message: 'Error al enviar correo', error });
+  }
+});
+
+
+
+
+
+
 
 // 📧 Función para enviar correos
 async function sendEmail(to, subject, reportHtml, attachments) {
