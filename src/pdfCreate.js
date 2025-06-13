@@ -196,7 +196,7 @@ async function generatePdfReportDomic(variables) {
         "https://drive.google.com/uc?export=view&id=1v6uI_38OqosSeTBOWJW2M09ZD9JolvYn",
         { responseType: "arraybuffer" }
     );
-    const imageBuffer = Buffer.from(response.data, "binary");
+    const imageBuffer = Buffer.from(response.data, 'binary');
 
     return new Promise((resolve, reject) => {
         const data = variables[0]; // Extraemos el objeto principal
@@ -210,8 +210,8 @@ async function generatePdfReportDomic(variables) {
         };
 
         // Insertar imagen
-        const imgData = `data:image/png;base64,${imageBuffer.toString("base64")}`;
-        doc.addImage(imgData, "PNG", 10, y, 50, 20);
+        doc.image(imageBuffer, 50, 50, { width: 100 })
+            .moveDown(2); // baja un poco el cursor
         y += 30;
 
         // Sección: Encabezado
