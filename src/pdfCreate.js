@@ -192,63 +192,109 @@ async function generatePdfReport(variables) {
 
 async function generatePdfReportDomic(variables) {
 
-    const response = await axios.get(
+   const response = await axios.get(
         "https://drive.google.com/uc?export=view&id=1v6uI_38OqosSeTBOWJW2M09ZD9JolvYn",
         { responseType: "arraybuffer" }
     );
     const imageBuffer = Buffer.from(response.data, 'binary');
 
     return new Promise((resolve, reject) => {
-        const data = variables[0]; // Extraemos el objeto principal
-
+        const data = variables[0]; // Objeto principal
         const doc = new PDFDocument({ size: 'LETTER', margin: 50 });
 
-        let y = 10; // Posición vertical inicial
-        const addLine = (text, space = 10) => {
-            doc.text(text, 10, y);
-            y += space;
-        };
+        let buffers = [];
+        doc.on('data', chunk => buffers.push(chunk));
+        doc.on('end', () => resolve(Buffer.concat(buffers)));
+        doc.on('error', err => reject(err));
 
-        // Insertar imagen
-        doc.image(imageBuffer, 50, 50, { width: 100 })
-            .moveDown(2); // baja un poco el cursor
-        y += 30;
+        // Insertar logo
+        doc.image(imageBuffer, 50, 50, { width: 100 }).moveDown(2);
 
-        // Sección: Encabezado
-        doc.setFontSize(16);
-        doc.setFont("helvetica", "bold");
-        addLine("DOCUMENTO DE ALTA DE CLIENTE");
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "normal");
-        addLine(`Fecha: ${new Date().toLocaleDateString()}`);
-        addLine(`Hora: ${new Date().toLocaleTimeString()}`);
-        addLine(`Entidad: ${data.entidad}`);
-        addLine(`Teléfono: ${data.telPerson}`);
-        addLine(`Email: ${data.emailPerson}`);
-        addLine("----------------------------------------");
+        // Título principal
+        doc
+            .fontSize(18)
+            .fillColor('black')
+            .text('DOCUMENTO DE ALTA DE CLIENTE', { align: 'center' })
+            .moveDown(1.5);
 
-        // Datos del Cliente
-        addLine(`Nombre del Cliente: ${data.numNameClient}`);
-        addLine(`Tipo de Servicio: ${data.typeServiceSelected}`);
-        addLine(`Plazo de Contratación: ${data.hiringPeriodSelected}`);
-        addLine(`Titular de la Cuenta: ${data.holder}`);
-        addLine(`Número de Cuenta: ${data.numAccount}`);
-        addLine(`Fecha de Vencimiento: ${data.dueDate}`);
-        addLine(`Domicilio: ${data.address}`);
-        addLine(`Cantidad Total: ${data.cantT}`);
-        addLine(`Días de Cargo: ${data.dayPaySelected}`);
-        addLine("----------------------------------------");
+        // === DATOS GENERALES ===
+        doc
+            .fontSize(14)
+            .fillColor('#007bff')
+            .text('Datos Generales del Cliente', { underline: true })
+            .fillColor('black')
+            .moveDown(0.5);
 
-        // Sección: Términos y Condiciones
-        addLine("Términos y Condiciones:");
-        addLine("1. El cliente acepta los términos y condiciones del servicio.");
+        doc.fontSize(11)
+            .text(`Fecha: ${new Date().toLocaleDateString()}`)
+            .text(`Hora: ${new Date().toLocaleTimeString()}`)
+            .text(`Entidad: ${data.entidad}`)
+            .text(`Teléfono: ${data.telPerson}`)
+            .text(`Email: ${data.emailPerson}`)
+            .moveDown(1);
 
-        // Convertir a Blob y resolver la Promesa
-        const pdfBlob = doc.output("blob");
-        resolve(pdfBlob);
+        // === SERVICIO CONTRATADO ===
+        doc
+            .fontSize(14)
+            .fillColor('#007bff')
+            .text('Servicio Contratado', { underline: true })
+            .fillColor('black')
+            .moveDown(0.5);
+
+        doc.fontSize(11)
+            .text(`Nombre del Cliente: ${data.numNameClient}`)
+            .text(`Tipo de Servicio: ${data.typeServiceSelected}`)
+            .text(`Plazo de Contratación: ${data.hiringPeriodSelected}`)
+            .moveDown(1);
+
+        // === INFORMACIÓN DE PAGO ===
+        doc
+            .fontSize(14)
+            .fillColor('#007bff')
+            .text('Información de Pago', { underline: true })
+            .fillColor('black')
+            .moveDown(0.5);
+
+        doc.fontSize(11)
+            .text(`Titular de la Cuenta: ${data.holder}`)
+            .text(`Número de Cuenta: ${data.numAccount}`)
+            .text(`Fecha de Vencimiento: ${data.dueDate}`)
+            .text(`Días de Cargo: ${data.dayPaySelected}`)
+            .text(`Cantidad Total: ${data.cantT}`)
+            .moveDown(1);
+
+        // === DOMICILIO ===
+        doc
+            .fontSize(14)
+            .fillColor('#007bff')
+            .text('Domicilio del Cliente', { underline: true })
+            .fillColor('black')
+            .moveDown(0.5);
+
+        doc.fontSize(11)
+            .text(`Dirección: ${data.address}`)
+            .moveDown(1);
+
+        // === TÉRMINOS Y CONDICIONES ===
+        doc
+            .fontSize(14)
+            .fillColor('#007bff')
+            .text('Términos y Condiciones', { underline: true })
+            .fillColor('black')
+            .moveDown(0.5);
+
+        doc.fontSize(11)
+            .text("1. El cliente acepta los términos y condiciones del servicio.")
+            .moveDown(2);
+
+        // Pie de página
+        doc
+            .fontSize(10)
+            .fillColor('#888')
+            .text('--- Fin del Reporte ---', { align: 'center' });
+
+        doc.end();
     });
-
-
 }
 
 module.exports = {
