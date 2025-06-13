@@ -201,7 +201,7 @@ async function generatePdfReportDomic(variables) {
     return new Promise((resolve, reject) => {
         const data = variables[0]; // Extraemos el objeto principal
 
-        const doc = new jsPDF();
+        const doc = PDFDocument({ size: "LETTER", margin: 50 });
 
         let y = 10; // Posición vertical inicial
         const addLine = (text, space = 10) => {
