@@ -208,15 +208,15 @@ async function generatePdfReportDomic(variables) {
         doc.on('error', err => reject(err));
 
         // Insertar logo
-        doc.image(imageBuffer, 50, 50, { width: 100 }).moveDown(2);
-        
+        doc.image(imageBuffer, 50, 50, { width: 100 }).moveUp(3);
+
         doc.moveTo(50, doc.y + 40); // agrega 40 puntos de espacio
 
         // Título principal
         doc
             .fontSize(18)
             .fillColor('black')
-            .text('DOCUMENTO DE DOMICILIACION DE CLIENTE', { align: 'center' })
+            .text('DOMICILIACION DE CLIENTE', { align: 'center' })
             .moveDown(1.5);
 
         // === DATOS GENERALES ===
