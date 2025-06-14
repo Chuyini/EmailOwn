@@ -286,7 +286,7 @@ async function generatePdfReportDomic(variables) {
             .moveDown(0.5);
 
         doc.fontSize(11)
-            .text("1. El cliente acepta los términos y condiciones del servicio.")
+            .text("1. El cliente acepta el aviso de privacidad del servicio.")
             .moveDown(2);
 
         // Pie de página
