@@ -281,7 +281,7 @@ async function generatePdfReportDomic(variables) {
         doc
             .fontSize(14)
             .fillColor('#007bff')
-            .text('Términos y Condiciones', { underline: true })
+            .text('Aviso de', { underline: true })
             .fillColor('black')
             .moveDown(0.5);
 
