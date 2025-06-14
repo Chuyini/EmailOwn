@@ -208,7 +208,7 @@ async function generatePdfReportDomic(variables) {
         doc.on('error', err => reject(err));
 
         // Insertar logo
-        doc.image(imageBuffer, 50, 50, { width: 100 }).moveUp(3);
+        doc.image(imageBuffer, 50, 50, { width: 100 }).moveDown(3);
 
         doc.moveTo(50, doc.y + 40); // agrega 40 puntos de espacio
 
