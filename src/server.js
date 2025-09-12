@@ -23,7 +23,7 @@ app.options('/send-email-domic', cors());
 // Aumentar el límite del payload
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
-
+ 
 // Iniciar el servidor
 const PORT = 3000;
 app.listen(PORT, () => {
