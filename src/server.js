@@ -278,15 +278,22 @@ app.post('/send-email-domic', async (req, res) => {
 
 app.post('/send-email-prub', async (req, res) => {
 
-  console.log("correo de prueba para verficar el servidor de correos");
-  const to = "jmlr231201@gmail.com";
-  const subject = "Correo de prueba desde servidor";
-  const emailBody = "<h1>Este es un correo de prueba</h1><p>Enviado desde el servidor de Node.js usando Nodemailer.</p>";
-  const validateAttachments = [];
-  await sendEmail(to, subject, emailBody, validateAttachments);
-  return res.status(200).json({ message: 'Correo de prueba enviado con éxito' });
+  try {
+    console.log("correo de prueba para verficar el servidor de correos");
+    const to = "jmlr231201@gmail.com";
+    const subject = "Correo de prueba desde servidor";
+    const emailBody = "<h1>Este es un correo de prueba</h1><p>Enviado desde el servidor de Node.js usando Nodemailer.</p>";
+    const validateAttachments = [];
+    await sendEmail(to, subject, emailBody, validateAttachments);
+    return res.status(200).json({ message: 'Correo de prueba enviado con éxito' });
 
 
+  } catch (error) {
+
+    console.error('Error al enviar correo de prueba:', error);
+    return res.status(500).json({ message: 'Error al enviar correo de prueba', error });
+
+  }
 });
 
 
