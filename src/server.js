@@ -284,6 +284,7 @@ app.post('/send-email-prub', async (req, res) => {
   const emailBody = "<h1>Este es un correo de prueba</h1><p>Enviado desde el servidor de Node.js usando Nodemailer.</p>";
   const validateAttachments = [];
   await sendEmail(to, subject, emailBody, validateAttachments);
+  return res.status(200).json({ message: 'Correo de prueba enviado con éxito' });
 
 
 });
