@@ -23,7 +23,7 @@ app.options('/send-email-domic', cors());
 // Aumentar el límite del payload
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
- 
+
 // Iniciar el servidor
 const PORT = 3000;
 app.listen(PORT, () => {
@@ -276,7 +276,17 @@ app.post('/send-email-domic', async (req, res) => {
 
 
 
+app.post('/send-email-prub', async (req, res) => {
 
+  console.log("correo de prueba para verficar el servidor de correos");
+  const to = "jmlr231201@gmail.com";
+  const subject = "Correo de prueba desde servidor";
+  const emailBody = "<h1>Este es un correo de prueba</h1><p>Enviado desde el servidor de Node.js usando Nodemailer.</p>";
+  const validateAttachments = [];
+  await sendEmail(to, subject, emailBody, validateAttachments);
+
+
+});
 
 
 // 📧 Función para enviar correos
