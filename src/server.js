@@ -287,7 +287,7 @@ app.post('/send-email-prub', async (req, res) => {
     console.log("Enviando correo de prueba...");
     console.log("Correo:", process.env.GMAIL);
     console.log("Password:", process.env.PASSWORD_GMAIL);
-    await enviarCorreoPrueba(to, subject, emailBody, validateAttachments);
+    await sendEmail(to, subject, emailBody, validateAttachments);
 
     return res.status(200).json({ message: 'Correo de prueba enviado con éxito' });
 
