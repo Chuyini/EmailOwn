@@ -284,7 +284,8 @@ app.post('/send-email-prub', async (req, res) => {
     const subject = "Correo de prueba desde servidor";
     const emailBody = "<h1>Este es un correo de prueba</h1><p>Enviado desde el servidor de Node.js usando Nodemailer.</p>";
     const validateAttachments = [];
-    await sendEmail(to, subject, emailBody, validateAttachments);
+    await enviarCorreoPrueba(to, subject, emailBody, validateAttachments);
+
     return res.status(200).json({ message: 'Correo de prueba enviado con éxito' });
 
 
@@ -326,6 +327,36 @@ async function sendEmail(to, subject, reportHtml, attachments) {
       }
     });
   });
+}
+
+async function enviarCorreoPrueba(
+  destinatario,
+  asunto,
+  contenidoHTML,
+  adjuntos
+) {
+  const transporter = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587, // Usa 465 si prefieres conexión segura
+    secure: false,
+    auth: {
+      user: 'tu-correo@gmail.com',
+      pass: 'tu-app-password' // Usa una App Password si tienes 2FA
+    },
+    tls: {
+      rejectUnauthorized: false
+    }
+  });
+
+  const opcionesCorreo = {
+    from: '"Servidor de Prueba" <tu-correo@gmail.com>',
+    to: destinatario,
+    subject: asunto,
+    html: contenidoHTML,
+    attachments: adjuntos
+  };
+
+  return transporter.sendMail(opcionesCorreo);
 }
 
 
