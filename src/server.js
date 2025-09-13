@@ -349,7 +349,7 @@ async function enviarCorreoPrueba(
   });
 
   const opcionesCorreo = {
-    from: '"Servidor de Prueba" <tu-correo@gmail.com>',
+    from: 'chatbotlaravazquez@gmail.com',
     to: destinatario,
     subject: asunto,
     html: contenidoHTML,
