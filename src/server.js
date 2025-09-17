@@ -309,7 +309,7 @@ app.post('/send-email-prub', async (req, res) => {
 // 📧 Función para enviar correos
 
 
-async function sendEmail(to, subject, reportHtml, attachments) {//Funcion con resend
+/*async function sendEmail(to, subject, reportHtml, attachments) {//Funcion con resend
     try {
         const { data, error } = await resend.emails.send({
             from: 'Acme <onboarding@resend.dev>',
@@ -324,8 +324,8 @@ async function sendEmail(to, subject, reportHtml, attachments) {//Funcion con re
     } catch (e) {
         console.error('❌ Error al enviar con Resend:', e);
     }
-}
-/*
+}*/
+
 async function sendEmail(to, subject, reportHtml, attachments) {
   let transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -354,7 +354,7 @@ async function sendEmail(to, subject, reportHtml, attachments) {
       }
     });
   });
-}*/
+}
 
 async function enviarCorreoPrueba(
   destinatario,
