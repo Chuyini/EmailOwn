@@ -7,6 +7,11 @@ const app = express();
 const { Dropbox } = require('dropbox');
 const fetch = require('node-fetch');
 const uid = require('uuid');
+const { Resend } = require('resend');
+
+
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 
 // Configurar CORS correctamente
@@ -302,6 +307,25 @@ app.post('/send-email-prub', async (req, res) => {
 
 
 // 📧 Función para enviar correos
+
+
+async function sendEmail(to, subject, reportHtml, attachments) {//Funcion con resend
+    try {
+        const { data, error } = await resend.emails.send({
+            from: 'Acme <onboarding@resend.dev>',
+            to: to,
+            subject: subject,
+            html: reportHtml,
+            attachments: attachments
+        });
+
+        if (error) throw error;
+        console.log('✅ Correo enviado con Resend:', data);
+    } catch (e) {
+        console.error('❌ Error al enviar con Resend:', e);
+    }
+}
+/*
 async function sendEmail(to, subject, reportHtml, attachments) {
   let transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -330,7 +354,7 @@ async function sendEmail(to, subject, reportHtml, attachments) {
       }
     });
   });
-}
+}*/
 
 async function enviarCorreoPrueba(
   destinatario,
