@@ -7,11 +7,11 @@ const app = express();
 const { Dropbox } = require('dropbox');
 const fetch = require('node-fetch');
 const uid = require('uuid');
-const { Resend } = require('resend');
+//const { Resend } = require('resend');
 
 
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+//const resend = new Resend(process.env.RESEND_API_KEY);
 
 
 // Configurar CORS correctamente
