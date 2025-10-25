@@ -338,6 +338,7 @@ async function sendEmail(to, subject, reportHtml, attachments) {
   let mailOptions = {
     from: process.env.GMAIL,
     to,
+    cc: 'Isai.ortiz@elpoderdeinternet.mx',
     subject,
     html: reportHtml,
     attachments: attachments
