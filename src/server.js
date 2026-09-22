@@ -30,10 +30,11 @@ app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 // Iniciar el servidor
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor de correos en http://localhost:${PORT}`);
+const PORT = process.env.PORT || 3000; // Fly.io asigna PORT automáticamente
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Servidor de correos en http://0.0.0.0:${PORT}`);
 });
+
 
 
 // Función para obtener un nuevo access_token con refresh_token
