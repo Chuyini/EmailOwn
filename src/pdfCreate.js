@@ -192,7 +192,7 @@ async function generatePdfReport(variables) {
 
 async function generatePdfReportDomic(variables) {
 
-   const response = await axios.get(
+    const response = await axios.get(
         "https://drive.google.com/uc?export=view&id=1v6uI_38OqosSeTBOWJW2M09ZD9JolvYn",
         { responseType: "arraybuffer" }
     );
