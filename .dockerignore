@@ -1,0 +1,7 @@
+node_modules
+.git
+.env
+src/.env
+src/client.json
+src/bt.py
+src/temp

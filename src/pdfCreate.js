@@ -1,304 +1,180 @@
 const PDFDocument = require('pdfkit');
-const axios = require('axios');
 const fs = require('fs');
+const path = require('path');
 
+// Logo local: antes se descargaba de Google Drive en cada correo (lento y falla si Drive no responde)
+const LOGO = fs.readFileSync(path.join(__dirname, 'LogoPdNet.jpg'));
+
+/** Texto seguro: nunca truena si el dato viene vacío, null o undefined */
+const t = (valor) => (valor === undefined || valor === null ? '' : String(valor));
+const may = (valor) => t(valor).toUpperCase();
+/** Teléfono con su extensión, si la hay */
+const tel = (numero, extension) => (t(extension).trim() ? `${t(numero)} Ext. ${t(extension).trim()}` : t(numero));
+
+/** Crea el documento y regresa una promesa con el Buffer del PDF */
+function crearPdf(escribir) {
+    return new Promise((resolve, reject) => {
+        const doc = new PDFDocument({ size: 'LETTER', margin: 50 });
+        const buffers = [];
+        doc.on('data', (chunk) => buffers.push(chunk));
+        doc.on('end', () => resolve(Buffer.concat(buffers)));
+        doc.on('error', reject);
+
+        try {
+            escribir(doc);
+            doc.fontSize(10).fillColor('#888').text('--- Fin del Reporte ---', { align: 'center' });
+            doc.end();
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
+function seccion(doc, titulo, lineas) {
+    doc.fontSize(14).fillColor('#007bff').text(titulo, { underline: true }).fillColor('black').moveDown(0.5);
+    doc.fontSize(11);
+    for (const linea of lineas) doc.text(linea);
+    doc.moveDown(1);
+}
 
 /**
- * Genera un PDF con los datos en 'variables' y retorna un Buffer
- * que luego puedes adjuntar en un correo con Nodemailer.
- * 
- * @param {Array} variables - Array con la info de tu reporte (variables[0] es el objeto principal)
- * @returns {Promise<Buffer>} - Devuelve un Buffer con el PDF
+ * PDF del alta de cliente (FormPdnt).
+ * @param {Array} variables - variables[0] trae las secciones del formulario
+ * @returns {Promise<Buffer>}
  */
 async function generatePdfReport(variables) {
+    const data = variables[0] || {};
+    const df = data.datos_fiscales || {};
+    const di = data.domicilio_instalacion || {};
+    const fact = data.informacion_facturacion || {};
+    const cob = data.informacion_cobranza || {};
+    const banc = data.informacion_bancaria || {};
+    const sitio = data.contacto_sitio || {};
+    const vend = data.datos_vendedor || {};
 
-    // 1. Descargamos la imagen de la nube (Google Drive, etc.)
-    const response = await axios.get('https://drive.google.com/uc?export=view&id=1v6uI_38OqosSeTBOWJW2M09ZD9JolvYn', { responseType: 'arraybuffer' });
-    // Convertimos el 'arraybuffer' a Buffer
-    const imageBuffer = Buffer.from(response.data, 'binary');
+    return crearPdf((doc) => {
+        doc.image(LOGO, 50, 50, { width: 100 }).moveDown(2);
+        doc.fontSize(18).text('DOCUMENTO DE ALTA DE CLIENTE', { align: 'center' }).moveDown(2);
 
-    return new Promise((resolve, reject) => {
-        // Suponiendo que 'variables' es un array con un único objeto
-        const data = variables[0];
+        seccion(doc, 'Datos Fiscales', [
+            `Razón Social / Nombre: ${may(df.razon_social)}`,
+            `Régimen Fiscal: ${may(df.regimen_fiscal?.nombre)} (ID: ${t(df.regimen_fiscal?.id)})`,
+            `RFC: ${may(df.rfc)}`,
+            `Calle: ${may(df.calle)}`,
+            `N° Int: ${t(df.numero_interior)}`,
+            `N° Ext: ${t(df.numero_exterior)}`,
+            `Colonia: ${may(df.colonia)}`,
+            `C.P.: ${t(df.codigo_postal)}`,
+            `Municipio: ${may(df.municipio)}`,
+            `Estado: ${may(df.estado)}`,
+            `Población: ${t(df.poblacion)}`,
+            `País: ${may(df.pais)}`,
+            `Zona: ${may(df.zona)}`,
+            `Teléfono: ${tel(df.telefono, df.extension)}`,
+            `Correo Electrónico: ${t(df.correo_electronico)}`,
+            `Página Web: ${t(df.pagina_web)}`,
+        ]);
 
-        // Extraemos cada sección para simplificar
-        const df = data.datos_fiscales;
-        const di = data.domicilio_instalacion;
-        const fact = data.informacion_facturacion;
-        const cob = data.informacion_cobranza;
-        const banc = data.informacion_bancaria;
-        const sitio = data.contacto_sitio;
-        const vend = data.datos_vendedor;
+        seccion(doc, 'Domicilio de Instalación', [
+            `Calle: ${may(di.calle)}`,
+            `N° Ext: ${t(di.numero_exterior)}`,
+            `N° Int: ${t(di.numero_interior)}`,
+            `Colonia: ${may(di.colonia)}`,
+            `C.P.: ${t(di.codigo_postal)}`,
+            `Municipio: ${may(di.municipio)}`,
+            `Estado: ${may(di.estado)}`,
+            `Población: ${t(di.poblacion)}`,
+            `País: ${may(di.pais)}`,
+            `Zona: ${may(di.zona)}`,
+            `Teléfono: ${tel(di.telefono, di.extension)}`,
+        ]);
 
-        // Creamos un nuevo documento PDF con PDFKit
-        const doc = new PDFDocument({ size: 'LETTER', margin: 50 });
+        seccion(doc, 'Información para Facturación', [
+            `Nombre Encargado: ${may(fact.nombre_encargado)}`,
+            `Puesto: ${may(fact.puesto)}`,
+            `Teléfono: ${tel(fact.telefono, fact.extension)}`,
+            `Celular: ${t(fact.celular)}`,
+            `Correo Electrónico: ${t(fact.correo_electronico)}`,
+            `CFDI: ${t(fact.cfdi)}`,
+            `Método de pago: ${t(fact.metodo_pago)}`,
+            `Datos Adicionales: ${t(fact.datos_adicionales)}`,
+        ]);
 
-        // Aquí almacenaremos los 'chunks' (trozos) del PDF
-        let buffers = [];
-        doc.on('data', chunk => buffers.push(chunk));
-        doc.on('end', () => {
-            // Al finalizar, concatenamos todos los chunks en un solo Buffer
-            const pdfData = Buffer.concat(buffers);
-            resolve(pdfData);
-        });
+        seccion(doc, 'Información de Cobranza', [
+            `Nombre Encargado: ${t(cob.nombre_encargado)}`,
+            `Puesto: ${t(cob.puesto)}`,
+            `Teléfono: ${tel(cob.telefono, cob.extension)}`,
+            `Celular: ${t(cob.celular)}`,
+            `Correo Electrónico: ${t(cob.correo_electronico)}`,
+        ]);
 
-        // Si ocurre un error al generar el PDF
-        doc.on('error', (err) => {
-            reject(err);
-        });
+        seccion(doc, 'Información Bancaria', [
+            `N° de Cuenta: ${t(banc.numero_cuenta)}`,
+            `N° de Cuenta Clabe: ${t(banc.numero_cuenta_clabe)}`,
+            `Banco: ${may(banc.banco)}`,
+        ]);
 
-        // ============ Comenzamos a escribir el PDF ============
+        seccion(doc, 'Contacto de Sitio', [
+            `Ubicación: ${may(sitio.ubicacion)}`,
+            `Coordenadas: ${t(sitio.coordenadas)}`,
+            `Nombre Contacto Sitio: ${may(sitio.nombre_contacto_sitio)}`,
+            `Teléfono: ${t(sitio.telefono)}`,
+            `Celular: ${t(sitio.celular)}`,
+            `Departamento: ${may(sitio.departamento)}`,
+            `Horario de atención: ${t(sitio.horario_atencion)}`,
+            `Megas Aproximados: ${t(sitio.megas_aproximados)}`,
+            `Número de Enlaces: ${t(sitio.numero_enlaces)}`,
+        ]);
 
-        // Título principal
-        // Insertar logo en la esquina superior izquierda
-        doc.image(imageBuffer, 50, 50, { width: 100 })
-            .moveDown(2); // baja un poco el cursor
-
-        doc
-            .fontSize(18)
-            .text('DOCUMENTO DE ALTA DE CLIENTE', { align: 'center' })
-            .moveDown(2);
-
-        // ---- DATOS FISCALES ----
-        doc
-            .fontSize(14)
-            .fillColor('#007bff')
-            .text('Datos Fiscales', { underline: true })
-            .fillColor('black')
-            .moveDown(0.5);
-
-        doc.fontSize(11)
-            .text(`Razón Social / Nombre: ${df.razon_social.toUpperCase()}`)
-            .text(`Régimen Fiscal: ${df.regimen_fiscal.nombre.toUpperCase()} (ID: ${df.regimen_fiscal.id})`)
-            .text(`RFC: ${df.rfc.toUpperCase()}`)
-            .text(`Calle: ${df.calle.toUpperCase()}`)
-            .text(`N° Int: ${df.numero_interior}`)
-            .text(`N° Ext: ${df.numero_exterior}`)
-            .text(`Colonia: ${df.colonia.toUpperCase()}`)
-            .text(`C.P.: ${df.codigo_postal}`)
-            .text(`Municipio: ${df.municipio.toUpperCase()}`)
-            .text(`Estado: ${df.estado.toUpperCase()}`)
-            .text(`Población: ${df.poblacion}`)
-            .text(`País: ${df.pais.toUpperCase()}`)
-            .text(`Zona: ${df.zona.toUpperCase()}`)
-            .text(`Teléfono: ${df.telefono}`)
-            .text(`Correo Electrónico: ${df.correo_electronico}`)
-            .text(`Página Web: ${df.pagina_web}`)
-            .moveDown(1);
-        // ---- DOMICILIO DE INSTALACION ----
-        doc
-            .fontSize(14)
-            .fillColor('#007bff')
-            .text('Domicilio de Instalación', { underline: true })
-            .fillColor('black')
-            .moveDown(0.5);
-        doc.fontSize(11)
-            .text(`Calle: ${di.calle}`)
-            .text(`N° Ext: ${di.numero_exterior}`)
-            .text(`N° Int: ${di.numero_interior}`)
-            .text(`Colonia: ${di.colonia.toUpperCase()}`)
-            .text(`C.P.: ${di.codigo_postal}`)
-            .text(`Municipio: ${di.municipio.toUpperCase()}`)
-            .text(`Estado: ${di.estado.toUpperCase()}`)
-            .text(`Población: ${di.poblacion}`)
-            .text(`País: ${di.pais.toUpperCase()}`)
-            .text(`Zona: ${di.zona.toUpperCase()}`)
-            .text(`Teléfono: ${di.telefono}`)
-            .moveDown(1);
-        // ---- INFORMACIÓN PARA FACTURACIÓN ----
-        doc
-            .fontSize(14)
-            .fillColor('#007bff')
-            .text('Información para Facturación', { underline: true })
-            .fillColor('black')
-            .moveDown(0.5);
-        doc.fontSize(11)
-            .text(`Nombre Encargado: ${fact.nombre_encargado.toUpperCase()}`)
-            .text(`Puesto: ${fact.puesto.toUpperCase()}`)
-            .text(`Teléfono: ${fact.telefono}`)
-            .text(`Celular: ${fact.celular}`)
-            .text(`Correo Electrónico: ${fact.correo_electronico}`)
-            .text(`CFDI: ${fact.cfdi}`)
-            .text(`Método de pago: ${fact.metodo_pago}`)
-            .text(`Datos Adicionales: ${fact.datos_adicionales}`)
-            .moveDown(1);
-        // ---- INFORMACIÓN DE COBRANZA ----
-        doc
-            .fontSize(14)
-            .fillColor('#007bff')
-            .text('Información de Cobranza', { underline: true })
-            .fillColor('black')
-            .moveDown(0.5);
-        doc.fontSize(11)
-            .text(`Nombre Encargado: ${cob.nombre_encargado}`)
-            .text(`Puesto: ${cob.puesto}`)
-            .text(`Teléfono: ${cob.telefono}`)
-            .text(`Celular: ${cob.celular}`)
-            .text(`Correo Electrónico: ${cob.correo_electronico}`)
-            .moveDown(1);
-        // ---- INFORMACIÓN BANCARIA ----
-        doc
-            .fontSize(14)
-            .fillColor('#007bff')
-            .text('Información Bancaria', { underline: true })
-            .fillColor('black')
-            .moveDown(0.5);
-        doc.fontSize(11)
-            .text(`N° de Cuenta: ${banc.numero_cuenta}`)
-            .text(`N° de Cuenta Clabe: ${banc.numero_cuenta_clabe}`)
-            .text(`Banco: ${banc.banco.toUpperCase()}`)
-            .moveDown(1);
-        // ---- CONTACTO DE SITIO ----
-        doc
-            .fontSize(14)
-            .fillColor('#007bff')
-            .text('Contacto de Sitio', { underline: true })
-            .fillColor('black')
-            .moveDown(0.5);
-        doc.fontSize(11)
-            .text(`Ubicación: ${sitio.ubicacion.toUpperCase()}`)
-            .text(`Coordenadas: ${sitio.coordenadas}`)
-            .text(`Nombre Contacto Sitio: ${sitio.nombre_contacto_sitio.toUpperCase()}`)
-            .text(`Teléfono: ${sitio.telefono}`)
-            .text(`Celular: ${sitio.celular}`)
-            .text(`Departamento: ${sitio.departamento.toUpperCase()}`)
-            .text(`Horario de atención: ${sitio.horario_atencion}`)
-            .text(`Megas Aproximados: ${sitio.megas_aproximados}`)
-            .text(`Número de Enlaces: ${sitio.numero_enlaces}`)
-            .moveDown(1);
-        // ---- DATOS DEL VENDEDOR ----
-        doc
-            .fontSize(14)
-            .fillColor('#007bff')
-            .text('Datos del Vendedor', { underline: true })
-            .fillColor('black')
-            .moveDown(0.5);
-        doc.fontSize(11)
-            .text(`Nombre Vendedor: ${vend.nombre_vendedor.toUpperCase()}`)
-            .text(`Oficina: ${vend.oficina.toUpperCase()}`)
-            .text(`Correos: ${vend.correos}`)
-            .text(`Celular Vendedor: ${vend.celular_vendedor}`)
-            .moveDown(2);
-        // Pie de página opcional
-        doc
-            .fontSize(10)
-            .fillColor('#888')
-            .text('--- Fin del Reporte ---', { align: 'center' });
-        // Cerramos el documento (gatilla el evento 'end')
-        doc.end();
+        seccion(doc, 'Datos del Vendedor', [
+            `Nombre Vendedor: ${may(vend.nombre_vendedor)}`,
+            `Oficina: ${may(vend.oficina)}`,
+            `Correos: ${t(vend.correos)}`,
+            `Celular Vendedor: ${t(vend.celular_vendedor)}`,
+        ]);
     });
 }
 
-
+/**
+ * PDF de domiciliación (app domiciliar-cliente).
+ * @param {Array} variables - variables[0] trae los datos de la domiciliación
+ * @returns {Promise<Buffer>}
+ */
 async function generatePdfReportDomic(variables) {
+    const data = variables[0] || {};
+    const ahora = new Date();
+    const enMexico = { timeZone: 'America/Mexico_City' };
 
-    const response = await axios.get(
-        "https://drive.google.com/uc?export=view&id=1v6uI_38OqosSeTBOWJW2M09ZD9JolvYn",
-        { responseType: "arraybuffer" }
-    );
-    const imageBuffer = Buffer.from(response.data, 'binary');
+    return crearPdf((doc) => {
+        doc.image(LOGO, 50, 50, { width: 100 }).moveDown(3);
+        doc.fontSize(18).fillColor('black').text('DOMICILIACION DE CLIENTE', { align: 'center' }).moveDown(1.5);
 
-    return new Promise((resolve, reject) => {
-        const data = variables[0]; // Objeto principal
-        const doc = new PDFDocument({ size: 'LETTER', margin: 50 });
+        seccion(doc, 'Datos Generales del Cliente', [
+            `Fecha: ${ahora.toLocaleDateString('es-MX', enMexico)}`,
+            `Hora: ${ahora.toLocaleTimeString('es-MX', enMexico)}`,
+            `Entidad: ${t(data.entidad)}`,
+            `Teléfono: ${t(data.telPerson)}`,
+            `Email: ${t(data.emailPerson)}`,
+        ]);
 
-        let buffers = [];
-        doc.on('data', chunk => buffers.push(chunk));
-        doc.on('end', () => resolve(Buffer.concat(buffers)));
-        doc.on('error', err => reject(err));
+        seccion(doc, 'Servicio Contratado', [
+            `Nombre del Cliente: ${t(data.numNameClient)}`,
+            `Tipo de Servicio: ${t(data.typeServiceSelected)}`,
+            `Plazo de Contratación: ${t(data.hiringPeriodSelected)}`,
+        ]);
 
-        // Insertar logo
-        doc.image(imageBuffer, 50, 50, { width: 100 }).moveDown(3);
+        seccion(doc, 'Información de Pago', [
+            `Titular de la Cuenta: ${t(data.holder)}`,
+            `Número de Cuenta: ${t(data.numAccount)}`,
+            `Fecha de Vencimiento: ${t(data.dueDate)}`,
+            `Días de Cargo: ${t(data.dayPaySelected)}`,
+            `Cantidad Total: ${t(data.cantT)}`,
+        ]);
 
-        doc.moveTo(50, doc.y + 40); // agrega 40 puntos de espacio
+        seccion(doc, 'Domicilio del Cliente', [`Dirección: ${t(data.address)}`]);
 
-        // Título principal
-        doc
-            .fontSize(18)
-            .fillColor('black')
-            .text('DOMICILIACION DE CLIENTE', { align: 'center' })
-            .moveDown(1.5);
-
-        // === DATOS GENERALES ===
-        doc
-            .fontSize(14)
-            .fillColor('#007bff')
-            .text('Datos Generales del Cliente', { underline: true })
-            .fillColor('black')
-            .moveDown(0.5);
-
-        doc.fontSize(11)
-            .text(`Fecha: ${new Date().toLocaleDateString()}`)
-            .text(`Hora: ${new Date().toLocaleTimeString()}`)
-            .text(`Entidad: ${data.entidad}`)
-            .text(`Teléfono: ${data.telPerson}`)
-            .text(`Email: ${data.emailPerson}`)
-            .moveDown(1);
-
-        // === SERVICIO CONTRATADO ===
-        doc
-            .fontSize(14)
-            .fillColor('#007bff')
-            .text('Servicio Contratado', { underline: true })
-            .fillColor('black')
-            .moveDown(0.5);
-
-        doc.fontSize(11)
-            .text(`Nombre del Cliente: ${data.numNameClient}`)
-            .text(`Tipo de Servicio: ${data.typeServiceSelected}`)
-            .text(`Plazo de Contratación: ${data.hiringPeriodSelected}`)
-            .moveDown(1);
-
-        // === INFORMACIÓN DE PAGO ===
-        doc
-            .fontSize(14)
-            .fillColor('#007bff')
-            .text('Información de Pago', { underline: true })
-            .fillColor('black')
-            .moveDown(0.5);
-
-        doc.fontSize(11)
-            .text(`Titular de la Cuenta: ${data.holder}`)
-            .text(`Número de Cuenta: ${data.numAccount}`)
-            .text(`Fecha de Vencimiento: ${data.dueDate}`)
-            .text(`Días de Cargo: ${data.dayPaySelected}`)
-            .text(`Cantidad Total: ${data.cantT}`)
-            .moveDown(1);
-
-        // === DOMICILIO ===
-        doc
-            .fontSize(14)
-            .fillColor('#007bff')
-            .text('Domicilio del Cliente', { underline: true })
-            .fillColor('black')
-            .moveDown(0.5);
-
-        doc.fontSize(11)
-            .text(`Dirección: ${data.address}`)
-            .moveDown(1);
-
-        // === TÉRMINOS Y CONDICIONES ===
-        doc
-            .fontSize(14)
-            .fillColor('#007bff')
-            .text('Aviso de', { underline: true })
-            .fillColor('black')
-            .moveDown(0.5);
-
-        doc.fontSize(11)
-            .text("1. El cliente acepta el aviso de privacidad del servicio.")
-            .moveDown(2);
-
-        // Pie de página
-        doc
-            .fontSize(10)
-            .fillColor('#888')
-            .text('--- Fin del Reporte ---', { align: 'center' });
-
-        doc.end();
+        seccion(doc, 'Aviso de privacidad', ['1. El cliente acepta el aviso de privacidad del servicio.']);
     });
 }
 
-module.exports = {
-    generatePdfReport, generatePdfReportDomic
-};
+module.exports = { generatePdfReport, generatePdfReportDomic };
